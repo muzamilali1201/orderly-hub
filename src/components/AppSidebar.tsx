@@ -1,0 +1,139 @@
+import { 
+  LayoutDashboard, 
+  Package, 
+  PlusCircle, 
+  Settings, 
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  User
+} from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Orders', href: '/orders', icon: Package },
+  { name: 'Create Order', href: '/orders/new', icon: PlusCircle, userOnly: true },
+];
+
+export function AppSidebar() {
+  const [collapsed, setCollapsed] = useState(false);
+  const { user, logout, isAdmin } = useAuth();
+  const location = useLocation();
+
+  const filteredNav = navigation.filter(item => 
+    !item.userOnly || (item.userOnly && !isAdmin)
+  );
+
+  return (
+    <aside
+      className={cn(
+        'flex flex-col h-screen border-r border-sidebar-border transition-all duration-300 ease-in-out',
+        collapsed ? 'w-16' : 'w-64',
+        'bg-gradient-to-b from-sidebar to-background'
+      )}
+    >
+      {/* Header */}
+      <div className={cn(
+        'flex items-center h-16 px-4 border-b border-sidebar-border',
+        collapsed ? 'justify-center' : 'justify-between'
+      )}>
+        {!collapsed && (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-[hsl(250_70%_60%)] flex items-center justify-center">
+              <Package className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-foreground">OrderFlow</span>
+          </div>
+        )}
+        {collapsed && (
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-[hsl(250_70%_60%)] flex items-center justify-center">
+            <Package className="w-5 h-5 text-primary-foreground" />
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {filteredNav.map((item) => {
+          const isActive = location.pathname === item.href;
+          return (
+            <NavLink
+              key={item.name}
+              to={item.href}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                isActive
+                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                collapsed && 'justify-center px-2'
+              )}
+            >
+              <item.icon className={cn('shrink-0', collapsed ? 'w-5 h-5' : 'w-5 h-5')} />
+              {!collapsed && <span>{item.name}</span>}
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* User Section */}
+      <div className="border-t border-sidebar-border p-3 space-y-2">
+        {/* User Info */}
+        <div className={cn(
+          'flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent/50',
+          collapsed && 'justify-center px-2'
+        )}>
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+            <User className="w-4 h-4 text-primary" />
+          </div>
+          {!collapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {user?.username}
+              </p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {user?.role}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Collapse Toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCollapsed(!collapsed)}
+          className={cn(
+            'w-full justify-center text-muted-foreground hover:text-foreground',
+            !collapsed && 'justify-between'
+          )}
+        >
+          {!collapsed && <span className="text-xs">Collapse</span>}
+          {collapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
+        </Button>
+
+        {/* Logout */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={logout}
+          className={cn(
+            'w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10',
+            collapsed ? 'justify-center' : 'justify-start'
+          )}
+        >
+          <LogOut className="w-4 h-4" />
+          {!collapsed && <span className="ml-2">Logout</span>}
+        </Button>
+      </div>
+    </aside>
+  );
+}
