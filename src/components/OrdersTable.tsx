@@ -8,7 +8,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Order, OrderStatus } from '@/types/order';
 import { StatusBadge } from './StatusBadge';
@@ -32,6 +33,20 @@ import { cn } from '@/lib/utils';
 interface OrdersTableProps {
   orders: Order[];
   isAdmin: boolean;
+  /** Show the search and status filter UI (defaults to true) */
+  showFilters?: boolean;
+  /** When true, server-side pagination is used; the table will render current page items and use external pagination controls */
+  serverPaginated?: boolean;
+  /** Current page (required when serverPaginated is true) */
+  currentPage?: number;
+  /** Total number of pages (optional) */
+  totalPages?: number;
+  /** Called when the page is changed (required when serverPaginated is true) */
+  onPageChange?: (page: number) => void;
+  /** Whether the server data is currently loading (optional) */
+  isLoading?: boolean;
+  /** When server doesn't return a total, indicates there may be a next page */
+  hasMore?: boolean;
 }
 
 const PAKISTAN_TZ = 'Asia/Karachi';
@@ -45,34 +60,48 @@ const statuses: (OrderStatus | 'ALL')[] = [
   'REFUNDED',
   'PAID',
   'CANCELLED',
+  "REFUNDED",
+  "REVIEWED",
+  "COMISSION_COLLECTED",
+  "REVIEW_DELAYED",
+  "REFUND_DELAYED",
+  
 ];
 
 const ITEMS_PER_PAGE = 10;
 
-export function OrdersTable({ orders, isAdmin }: OrdersTableProps) {
+export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginated = false, currentPage: currentPageProp = 1, totalPages: totalPagesProp, onPageChange, isLoading = false, hasMore = false }: OrdersTableProps) {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter orders
+  // Screenshot preview/lightbox state
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+
+  // Filter orders (client-side filtering still applies to the current page of orders)
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.orderName.toLowerCase().includes(search.toLowerCase()) ||
       order.amazonOrderNumber.toLowerCase().includes(search.toLowerCase()) ||
       order.buyerPaypal.toLowerCase().includes(search.toLowerCase()) ||
       order.createdBy.email.toLowerCase().includes(search.toLowerCase()) ||
-      order.createdBy.username.toLowerCase().includes(search.toLowerCase());
+      order.createdBy.username.toLowerCase().includes(search.toLowerCase()) ||
+      order.id.toString().includes(search);
 
     const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedOrders = filteredOrders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  // Pagination (client or server)
+  const clientTotalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+  const isServer = serverPaginated;
+  const totalPages = isServer ? (typeof totalPagesProp === 'number' ? totalPagesProp : undefined) : clientTotalPages;
+
+  // When serverPaginated, the `orders` prop is assumed to be the current page's items
+  const paginatedOrders = isServer ? filteredOrders : filteredOrders.slice((currentPage - 1) * ITEMS_PER_PAGE, (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE);
 
   const formatDate = (dateString: string) => {
     return formatInTimeZone(new Date(dateString), PAKISTAN_TZ, 'MMM d, yyyy h:mm a');
@@ -81,39 +110,41 @@ export function OrdersTable({ orders, isAdmin }: OrdersTableProps) {
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search orders, Amazon #, PayPal, email..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+      {showFilters && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search orders, Amazon #, PayPal, email..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-10"
+            />
+          </div>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value as OrderStatus | 'ALL');
               setCurrentPage(1);
             }}
-            className="pl-10"
-          />
+          >
+            <SelectTrigger className="w-full sm:w-48">
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              {statuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status === 'ALL' ? 'All Statuses' : status.replace('_', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Select
-          value={statusFilter}
-          onValueChange={(value) => {
-            setStatusFilter(value as OrderStatus | 'ALL');
-            setCurrentPage(1);
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-48">
-            <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            {statuses.map((status) => (
-              <SelectItem key={status} value={status}>
-                {status === 'ALL' ? 'All Statuses' : status.replace('_', ' ')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      )}
 
       {/* Table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-lg">
@@ -126,6 +157,9 @@ export function OrdersTable({ orders, isAdmin }: OrdersTableProps) {
                 </th>
                 <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Amazon #
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  ID
                 </th>
                 <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Buyer PayPal
@@ -147,7 +181,7 @@ export function OrdersTable({ orders, isAdmin }: OrdersTableProps) {
             <tbody className="divide-y divide-border">
               {paginatedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-16 text-center">
+                  <td colSpan={8} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
                         <Search className="w-8 h-8 text-muted-foreground" />
@@ -171,18 +205,40 @@ export function OrdersTable({ orders, isAdmin }: OrdersTableProps) {
                     onClick={() => navigate(`/orders/${order.id}`)}
                   >
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                          {order.orderName}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          by {order.createdBy.username}
-                        </span>
+                      <div className="flex items-center gap-4">
+                        {order.screenshots && order.screenshots.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[0]); setPreviewOpen(true); }}
+                            className="w-12 h-12 rounded-md overflow-hidden bg-muted flex items-center justify-center hover:scale-105 transition-transform"
+                            title="View screenshot"
+                          >
+                            <img src={order.screenshots[0]} alt={`Screenshot for ${order.orderName}`} className="w-full h-full object-cover" />
+                          </button>
+                        ) : (
+                          <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
+                            <ImageIcon className="w-5 h-5" />
+                          </div>
+                        )}
+
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                            {order.orderName}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            by {order.createdBy.username}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
                         {order.amazonOrderNumber}
+                      </code>
+                    </td>
+                    <td className="px-6 py-4">
+                      <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
+                        {order.id}
                       </code>
                     </td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">
@@ -220,45 +276,87 @@ export function OrdersTable({ orders, isAdmin }: OrdersTableProps) {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {((typeof totalPages !== 'undefined' && totalPages > 1) || (isServer && (hasMore || (currentPageProp > 1)))) && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/30">
-            <p className="text-sm text-muted-foreground">
-              Showing {startIndex + 1} to {Math.min(startIndex + ITEMS_PER_PAGE, filteredOrders.length)} of{' '}
-              {filteredOrders.length} orders
-            </p>
+            {!isServer ? (
+              <p className="text-sm text-muted-foreground">
+                Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min((currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE, filteredOrders.length)} of{' '}
+                {filteredOrders.length} orders
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Page {currentPageProp}{typeof totalPages !== 'undefined' ? ` of ${totalPages}` : ''}
+              </p>
+            )}
+
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
+                onClick={() => {
+                  if (isServer) {
+                    onPageChange?.(Math.max(1, (currentPageProp || 1) - 1));
+                  } else {
+                    setCurrentPage((p) => Math.max(1, p - 1));
+                  }
+                }}
+                disabled={isServer ? (currentPageProp === 1) : (currentPage === 1)}
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    className="w-8 h-8 p-0"
-                  >
-                    {page}
-                  </Button>
-                ))}
-              </div>
+
+              {/* Page numbers when we know totalPages */}
+              {typeof totalPages !== 'undefined' ? (
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={(isServer ? currentPageProp : currentPage) === page ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => {
+                        if (isServer) {
+                          onPageChange?.(page);
+                        } else {
+                          setCurrentPage(page);
+                        }
+                      }}
+                      className="w-8 h-8 p-0"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+              ) : null}
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
+                onClick={() => {
+                  if (isServer) {
+                    onPageChange?.(typeof totalPages !== 'undefined' ? Math.min(totalPages, (currentPageProp || 1) + 1) : (currentPageProp || 1) + 1);
+                  } else {
+                    setCurrentPage((p) => Math.min(totalPages, p + 1));
+                  }
+                }}
+                disabled={isServer ? (!hasMore && (typeof totalPages === 'undefined')) || (typeof totalPages !== 'undefined' && currentPageProp === totalPages) : (currentPage === totalPages)}
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
         )}
+
+        {/* Screenshot preview dialog */}
+        {previewSrc && (
+          <div>
+            <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 ${previewOpen ? 'block' : 'hidden'}`} onClick={() => setPreviewOpen(false)}>
+              <div className="max-w-4xl max-h-[80vh] p-4">
+                <img src={previewSrc} alt="Screenshot preview" className="max-h-[80vh] w-auto max-w-full object-contain rounded" />
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

@@ -8,40 +8,80 @@ import { Textarea } from '@/components/ui/textarea';
 import { FileUpload } from '@/components/FileUpload';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function CreateOrder() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
     orderName: '',
     amazonOrderNumber: '',
     buyerPaypal: '',
     comments: '',
   });
-  const [screenshots, setScreenshots] = useState<File[]>([]);
+  const [orderScreenshot, setOrderScreenshot] = useState<File | null>(null);
+  const [productScreenshot, setProductScreenshot] = useState<File | null>(null);
 
-  // Redirect admin users
-  if (isAdmin) {
-    navigate('/dashboard');
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setUploadProgress(0);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Require order screenshot
+      if (!orderScreenshot) {
+        toast({
+          title: 'Please upload order screenshot',
+          description: 'Order screenshot (OrderSS) is required.',
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-    toast({
-      title: 'Order created successfully!',
-      description: 'Your order has been submitted and is now being processed.',
-    });
+      const form = new FormData();
+      form.append('orderName', formData.orderName);
+      form.append('amazonOrderNo', formData.amazonOrderNumber);
+      form.append('buyerPaypal', formData.buyerPaypal);
+      if (formData.comments) form.append('comments', formData.comments);
 
-    setIsSubmitting(false);
-    navigate('/orders');
+      // Attach screenshots
+      form.append('OrderSS', orderScreenshot);
+      if (productScreenshot) form.append('AmazonProductSS', productScreenshot);
+
+      // Call API with upload progress
+      const res = await import('@/lib/api').then((m) => m.createOrder(form, {
+        onUploadProgress: (ev: ProgressEvent) => {
+          if (ev.total) {
+            setUploadProgress(Math.round((ev.loaded * 100) / ev.total));
+          }
+        }
+      }));
+
+      toast({
+        title: 'Order created successfully!',
+        description: 'Your order has been submitted and is now being processed.',
+      });
+
+      // refresh list
+      queryClient.invalidateQueries(['orders']);
+
+      setIsSubmitting(false);
+      navigate('/orders');
+    } catch (err) {
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to create order';
+      toast({
+        title: 'Order creation failed',
+        description: message,
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -58,19 +98,24 @@ export default function CreateOrder() {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-6 py-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="mb-2 -ml-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Back
-          </Button>
-          <h1 className="text-2xl font-bold text-foreground">Create New Order</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Fill in the order details below
-          </p>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="-ml-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Create New Order</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Fill in the order details below
+              </p>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -169,46 +214,69 @@ export default function CreateOrder() {
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Screenshots</h2>
                 <p className="text-sm text-muted-foreground">
-                  Upload order confirmation screenshots
+                  Upload the required Order screenshot and an optional Amazon product screenshot
                 </p>
               </div>
             </div>
 
-            <FileUpload
-              files={screenshots}
-              onFilesChange={setScreenshots}
-              maxFiles={5}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="orderSS">Order Screenshot <span className="text-destructive">*</span></Label>
+                <FileUpload
+                  files={orderScreenshot ? [orderScreenshot] : []}
+                  onFilesChange={(files) => setOrderScreenshot(files[0] ?? null)}
+                  maxFiles={1}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="productSS">Amazon Product Screenshot (optional)</Label>
+                <FileUpload
+                  files={productScreenshot ? [productScreenshot] : []}
+                  onFilesChange={(files) => setProductScreenshot(files[0] ?? null)}
+                  maxFiles={1}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="hero"
-              size="lg"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Creating Order...
-                </>
-              ) : (
-                <>
-                  <Package className="w-4 h-4" />
-                  Create Order
-                </>
-              )}
-            </Button>
+          <div className="flex flex-col gap-3">
+            {uploadProgress > 0 && (
+              <div className="w-full bg-muted/30 rounded overflow-hidden">
+                <div className="h-2 bg-primary" style={{ width: `${uploadProgress}%`, transition: 'width 200ms' }} />
+                <div className="text-xs text-muted-foreground mt-1">Uploading: {uploadProgress}%</div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="hero"
+                size="lg"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creating Order...
+                  </>
+                ) : (
+                  <>
+                    <Package className="w-4 h-4" />
+                    Create Order
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </main>

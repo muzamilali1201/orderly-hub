@@ -1,0 +1,167 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getAlertHistory } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { StatusHistoryEntry } from '@/types/order';
+import { StatusBadge } from '@/components/StatusBadge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatInTimeZone } from 'date-fns-tz';
+
+const PAKISTAN_TZ = 'Asia/Karachi';
+
+export default function Alerts() {
+  const { toast } = useToast();
+
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [orderFilter, setOrderFilter] = useState('');
+  // Use 'ALL' as the sentinel for no-status filter (Select requires non-empty values)
+  const [statusFilter, setStatusFilter] = useState('ALL');
+
+  const { data, isLoading, error, isFetching } = useQuery({
+    queryKey: ['alert-history', { page, perPage, orderFilter, statusFilter }],
+    queryFn: async () => {
+      // Use the new /alert/history API
+      const res = await getAlertHistory({ page, perPage, limit: perPage, orderId: orderFilter || undefined, status: statusFilter === 'ALL' ? undefined : statusFilter });
+      return res.data ?? res;
+    },
+  });
+
+  useEffect(() => {
+    if (error) {
+      toast({ title: 'Failed to load alerts', description: (error as any)?.message || 'Unable to fetch alerts', variant: 'destructive' });
+    }
+  }, [error, toast]);
+
+  const raw = Array.isArray(data) ? data : (data as any)?.data ?? [];
+  const totalCountRaw = (data as any)?.totalCount ?? (data as any)?.count ?? (data as any)?.total ?? (data as any)?.meta?.total ?? (data as any)?.totalCount;
+  const totalCountNum = typeof totalCountRaw !== 'undefined' ? Number(totalCountRaw) : undefined;
+  const totalPages = typeof totalCountNum === 'number' && Number.isFinite(totalCountNum)
+    ? Math.max(1, Math.ceil(totalCountNum / perPage))
+    : (data as any)?.totalPages ?? undefined;
+
+  const formatDateTime = (d: string) => formatInTimeZone(new Date(d), PAKISTAN_TZ, 'MMM d, yyyy h:mm a');
+
+  // Map /alert/history response shape to StatusHistoryEntry
+  const entries: Array<StatusHistoryEntry & { orderName?: string; amazonOrderNo?: string }> = (raw as any[]).map((e) => ({
+    id: e._id ?? e.id,
+    orderId: (e.orderId && (typeof e.orderId === 'object') ? (e.orderId._id ?? e.orderId.id) : (e.orderId ?? e.order_id ?? e.order)) as string,
+    // prefer orderName/title if server provides it; fallback to amazonOrderNo for display
+    orderName: (e.orderId && typeof e.orderId === 'object' ? (e.orderId.orderName ?? e.orderId.title ?? e.orderId.name) : undefined) ?? undefined,
+    amazonOrderNo: (e.orderId && typeof e.orderId === 'object' ? (e.orderId.amazonOrderNo ?? e.orderId.amazonOrderNo) : undefined) ?? undefined,
+    fromStatus: (e.previousStatus ?? e.previous_status ?? null) as any,
+    toStatus: (e.newStatus ?? e.new_status ?? e.status ?? 'ORDERED') as any,
+    changedBy: {
+      id: e.changedBy?._id ?? e.changedBy?.id ?? e.changed_by?._id ?? e.changed_by?.id ?? '',
+      username: e.changedBy?.username ?? e.changedBy?.name ?? e.changed_by?.username ?? 'unknown',
+      role: e.role ?? e.changedBy?.role ?? 'user',
+    },
+    changedAt: e.createdAt ?? e.created_at ?? e.changedAt ?? new Date().toISOString(),
+  }));
+
+  return (
+    <div className="min-h-screen">
+      <header className="border-b border-border bg-card/50 sticky top-0 z-10">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Alerts</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Recent status changes across orders</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {/* <div className="w-48">
+              <Input placeholder="Filter by Order ID" value={orderFilter} onChange={(e) => { setOrderFilter(e.target.value); setPage(1); }} />
+            </div> */}
+            {/* <div className="w-40">
+              <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Statuses</SelectItem>
+                  <SelectItem value="ORDERED">Ordered</SelectItem>
+                  <SelectItem value="REVIEWED">Reviewed</SelectItem>
+                  <SelectItem value="REVIEW_AWAITED">Review Awaited</SelectItem>
+                  <SelectItem value="CORRECTED">Corrected</SelectItem>
+                  <SelectItem value="PAID">Paid</SelectItem>
+                  <SelectItem value="REFUNDED">Refunded</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div> */}
+            <div className="w-28">
+              <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={`${perPage}/page`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 / page</SelectItem>
+                  <SelectItem value="10">10 / page</SelectItem>
+                  <SelectItem value="25">25 / page</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="p-6">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted/50 border-b border-border">
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order ID</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">From</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">To</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Changed By</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">When</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {entries.length === 0 ? (
+                  <tr><td colSpan={5} className="px-6 py-16 text-center">{isLoading ? 'Loading...' : 'No alerts found'}</td></tr>
+                ) : (
+                  entries.map((e) => (
+                    <tr key={e.id} className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => { /* navigate to order if needed */ }}>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
+                          <code className="text-sm bg-muted px-2 py-1 rounded font-mono">{e.orderId}</code>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4"><StatusBadge status={(e.fromStatus as any) ?? 'ORDERED'} size="sm" /></td>
+                      <td className="px-6 py-4"><StatusBadge status={(e.toStatus as any)} size="sm" /></td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{e.changedBy.username} <span className="text-xs text-muted-foreground/70">({e.changedBy.role})</span></td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateTime(e.changedAt)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {(typeof totalPages !== 'undefined' ? totalPages > 1 : entries.length > 0) && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/30">
+              <p className="text-sm text-muted-foreground">Page {page}{totalPages ? ` of ${totalPages}` : ''}</p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                {totalPages ? Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <Button key={p} variant={p === page ? 'default' : 'ghost'} size="sm" onClick={() => setPage(p)} className="w-8 h-8 p-0">{p}</Button>
+                )) : null}
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={typeof totalPages !== 'undefined' && page === totalPages}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}

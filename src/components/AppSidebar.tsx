@@ -17,6 +17,7 @@ import { useState } from 'react';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Orders', href: '/orders', icon: Package },
+  { name: 'Alerts', href: '/alerts', icon: Settings },
   { name: 'Create Order', href: '/orders/new', icon: PlusCircle, userOnly: true },
 ];
 

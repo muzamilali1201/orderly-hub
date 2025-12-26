@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatInTimeZone } from 'date-fns-tz';
 import { 
@@ -11,8 +11,8 @@ import {
   MessageSquare,
   Loader2
 } from 'lucide-react';
-import { mockOrders } from '@/data/mockOrders';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { StatusTimeline } from '@/components/StatusTimeline';
@@ -34,6 +34,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -55,12 +56,79 @@ export default function OrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
 
-  const order = mockOrders.find((o) => o.id === id);
+  // Lightbox state for viewing screenshots
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+
+  const { toast } = useToast();
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['order', id],
+    queryFn: async () => {
+      if (!id) return null;
+      const res = await import('@/lib/api').then((m) => m.getOrder(id));
+      return res.data?.data ?? res.data;
+    },
+    enabled: !!id,
+  });
+
+  // const queryClient = ( import('@tanstack/react-query')).QueryClient ? null : null; // placeholder to lazily import queryClient in confirm
+
+
+  if (error) {
+    toast({ title: 'Failed to fetch order', description: (error as any)?.message || 'Unable to fetch order', variant: 'destructive' });
+  }
+
+  const mapOrder = (o: any) => ({
+    id: o._id ?? o.id,
+    orderName: o.orderName,
+    amazonOrderNumber: o.amazonOrderNo ?? o.amazonOrderNumber,
+    buyerPaypal: o.buyerPaypal,
+    status: o.status,
+    comments: o.comments,
+    screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),
+    createdBy: {
+      id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,
+      username: o.userId?.username ?? o.createdBy?.username,
+      email: o.userId?.email ?? o.createdBy?.email,
+    },
+    createdAt: o.createdAt,
+    updatedAt: o.updatedAt,
+    statusHistory: o.statusHistory ?? [],
+  });
+
+  const order = data ? mapOrder(data) : null;
+
+  const queryClient = useQueryClient();
+
+  // Keyboard navigation for lightbox (moved up so hooks are called consistently)
+  useEffect(() => {
+    if (!lightboxOpen || !order?.screenshots?.length) return;
+    const len = order.screenshots.length;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') setActiveIndex((i) => (i - 1 + len) % len);
+      if (e.key === 'ArrowRight') setActiveIndex((i) => (i + 1) % len);
+      if (e.key === 'Escape') setLightboxOpen(false);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [lightboxOpen, order?.screenshots?.length]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <svg className="animate-spin h-8 w-8 text-primary mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+        </div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -92,22 +160,31 @@ export default function OrderDetails() {
   };
 
   const confirmStatusChange = async () => {
-    if (!pendingStatus) return;
-    
+    if (!pendingStatus || !order) return;
+
     setIsUpdating(true);
     setShowConfirm(false);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: 'Status updated',
-      description: `Order status changed to ${pendingStatus.replace('_', ' ')}`,
-    });
-    
-    setIsUpdating(false);
-    setPendingStatus(null);
+
+    try {
+      await import('@/lib/api').then((m) => m.updateOrderStatus(order.id, pendingStatus));
+
+      toast({
+        title: 'Status updated',
+        description: `Order status changed to ${pendingStatus.replace('_', ' ')}`,
+      });
+
+      // Refresh both single order and orders list
+      await refetch();
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    } catch (err) {
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to update status';
+      toast({ title: 'Update failed', description: message, variant: 'destructive' });
+    } finally {
+      setIsUpdating(false);
+      setPendingStatus(null);
+    }
   };
+
 
   return (
     <div className="min-h-screen">
@@ -215,16 +292,18 @@ export default function OrderDetails() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {order.screenshots.map((screenshot, index) => (
-                    <div
+                    <button
                       key={index}
-                      className="aspect-video rounded-lg border border-border bg-muted overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors"
+                      type="button"
+                      onClick={() => { setActiveIndex(index); setLightboxOpen(true); }}
+                      className="aspect-video rounded-lg border border-border bg-muted overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors p-0"
                     >
                       <img
                         src={screenshot}
                         alt={`Screenshot ${index + 1}`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -277,6 +356,40 @@ export default function OrderDetails() {
         </div>
       </main>
 
+      {/* Image Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="w-full max-w-5xl p-0 bg-transparent shadow-none">
+          <div className="relative flex items-center justify-center bg-black/80 p-4">
+            <img
+              src={order.screenshots[activeIndex]}
+              alt={`Screenshot ${activeIndex + 1}`}
+              className="max-h-[80vh] w-auto max-w-full object-contain"
+            />
+
+            {order.screenshots.length > 1 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 -translate-y-1/2"
+                  onClick={(e) => { e.stopPropagation(); setActiveIndex((i) => (i - 1 + order.screenshots.length) % order.screenshots.length); }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  onClick={(e) => { e.stopPropagation(); setActiveIndex((i) => (i + 1) % order.screenshots.length); }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                </Button>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent>
@@ -296,6 +409,8 @@ export default function OrderDetails() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+
     </div>
   );
 }

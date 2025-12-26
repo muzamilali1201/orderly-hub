@@ -5,7 +5,12 @@ export type OrderStatus =
   | 'CORRECTED' 
   | 'REFUNDED' 
   | 'PAID' 
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | "REFUNDED"
+  | "REVIEWED"
+  | "COMISSION_COLLECTED"
+  | "REVIEW_DELAYED"
+  | 'REFUND_DELAYED'
 
 export type UserRole = 'admin' | 'user';
 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { User, UserRole } from '@/types/order';
+import { registerUser, loginUser } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -7,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  signUp: (email: string, password: string, username?: string, role?: UserRole) => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -37,26 +39,98 @@ const mockUsers: Record<string, { password: string; user: User }> = {
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const raw = localStorage.getItem('user');
+      return raw ? (JSON.parse(raw) as User) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockUser = mockUsers[email.toLowerCase()];
-    if (mockUser && mockUser.password === password) {
-      setUser(mockUser.user);
+    try {
+      const res = await loginUser({ email, password });
+      const token = res.data?.token;
+      const data = res.data?.data;
+
+      if (!token || !data) {
+        throw new Error('Invalid server response');
+      }
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({
+        id: data._id ?? data.id ?? '',
+        email: data.email,
+        username: data.username,
+        role: data.role,
+        createdAt: data.createdAt,
+      }));
+
+      setUser({
+        id: data._id ?? data.id ?? '',
+        email: data.email,
+        username: data.username,
+        role: data.role,
+        createdAt: data.createdAt,
+      });
+
       setIsLoading(false);
-    } else {
+    } catch (err) {
       setIsLoading(false);
-      throw new Error('Invalid email or password');
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Login failed';
+      throw new Error(message);
+    }
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string, username?: string, role?: UserRole) => {
+    setIsLoading(true);
+    try {
+      await registerUser({ username: username ?? email.split('@')[0], email, password, role });
+
+      // After successful registration, log in to get token and user data
+      const res = await loginUser({ email, password });
+      const token = res.data?.token;
+      const data = res.data?.data;
+
+      if (!token || !data) {
+        throw new Error('Invalid server response');
+      }
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({
+        id: data._id ?? data.id ?? '',
+        email: data.email,
+        username: data.username,
+        role: data.role,
+        createdAt: data.createdAt,
+      }));
+
+      setUser({
+        id: data._id ?? data.id ?? '',
+        email: data.email,
+        username: data.username,
+        role: data.role,
+        createdAt: data.createdAt,
+      });
+
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Registration failed';
+      throw new Error(message);
     }
   }, []);
 
   const logout = useCallback(() => {
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } catch (e) {
+      // ignore
+    }
     setUser(null);
   }, []);
 
@@ -66,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     login,
     logout,
+    signUp,
     isAdmin: user?.role === 'admin',
   };
 
