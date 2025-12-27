@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Package, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,18 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Show session expired message if redirected from 401
+  useEffect(() => {
+    if (searchParams.get('session_expired') === 'true') {
+      toast({
+        title: 'Session Expired',
+        description: 'Your session has expired. Please log in again.',
+        variant: 'destructive',
+      });
+    }
+  }, [searchParams, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +41,7 @@ export default function Login() {
     } catch (error) {
       toast({
         title: 'Login failed',
-        description: 'Invalid email or password. Please try again.',
+        description: (error as Error).message || 'Invalid email or password. Please try again.',
         variant: 'destructive',
       });
     } finally {
