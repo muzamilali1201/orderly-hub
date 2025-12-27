@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Loader2
 } from 'lucide-react';
+import { NotificationBell } from '@/components/NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -191,15 +192,18 @@ export default function OrderDetails() {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-6 py-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="mb-2 -ml-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Back
-          </Button>
+          <div className="flex items-center justify-between mb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="-ml-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+            <NotificationBell />
+          </div>
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-foreground">{order.orderName}</h1>
             <StatusBadge status={order.status} />

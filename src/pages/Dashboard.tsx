@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { mockOrders } from '@/data/mockOrders';
 import { StatsCard } from '@/components/StatsCard';
 import { OrdersTable } from '@/components/OrdersTable';
+import { NotificationBell } from '@/components/NotificationBell';
 import { 
   Package, 
   Clock, 
@@ -169,12 +170,15 @@ export default function Dashboard() {
               Welcome back, {user?.username}
             </p>
           </div>
-          {!isAdmin && (
-            <Button variant="hero" onClick={() => navigate('/orders/new')}>
-              <PlusCircle className="w-4 h-4" />
-              New Order
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            {!isAdmin && (
+              <Button variant="hero" onClick={() => navigate('/orders/new')}>
+                <PlusCircle className="w-4 h-4" />
+                New Order
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
