@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { OrdersTable } from '@/components/OrdersTable';
+import { NotificationBell } from '@/components/NotificationBell';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -106,6 +107,7 @@ export default function Orders() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <div className="hidden sm:block">
               <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
                 <SelectTrigger className="w-28 h-9">
