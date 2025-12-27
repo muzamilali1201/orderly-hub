@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { FileUpload } from '@/components/FileUpload';
+import { NotificationBell } from '@/components/NotificationBell';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -98,23 +99,26 @@ export default function CreateOrder() {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="-ml-2"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back
-            </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="-ml-2"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Back
+              </Button>
 
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Create New Order</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Fill in the order details below
-              </p>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Create New Order</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Fill in the order details below
+                </p>
+              </div>
             </div>
+            <NotificationBell />
           </div>
         </div>
       </header>
