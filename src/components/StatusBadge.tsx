@@ -7,7 +7,9 @@ import {
   Edit, 
   RefreshCcw, 
   DollarSign, 
-  XCircle 
+  XCircle,
+  Coins,
+  AlertTriangle
 } from 'lucide-react';
 
 interface StatusBadgeProps {
@@ -63,6 +65,24 @@ const statusConfig: Record<OrderStatus, {
     bgClass: 'bg-status-cancelled/15 border-status-cancelled/30',
     icon: XCircle,
   },
+  COMISSION_COLLECTED: {
+    label: 'Commission Collected',
+    colorClass: 'text-status-paid',
+    bgClass: 'bg-status-paid/15 border-status-paid/30',
+    icon: Coins,
+  },
+  REVIEW_DELAYED: {
+    label: 'Review Delayed',
+    colorClass: 'text-status-review-awaited',
+    bgClass: 'bg-status-review-awaited/15 border-status-review-awaited/30',
+    icon: AlertTriangle,
+  },
+  REFUND_DELAYED: {
+    label: 'Refund Delayed',
+    colorClass: 'text-status-refunded',
+    bgClass: 'bg-status-refunded/15 border-status-refunded/30',
+    icon: AlertTriangle,
+  },
 };
 
 const sizeClasses = {
@@ -78,7 +98,12 @@ const iconSizes = {
 };
 
 export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] ?? {
+    label: status,
+    colorClass: 'text-muted-foreground',
+    bgClass: 'bg-muted/15 border-muted/30',
+    icon: Package,
+  };
   const Icon = config.icon;
 
   return (

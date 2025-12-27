@@ -10,14 +10,14 @@ import {
   DollarSign, 
   TrendingUp,
   PlusCircle,
-  X,
-  XCircle
+  XCircle,
+  Coins,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { CANCELLED } from 'dns';
 
 export default function Dashboard() {
   const { user, isAdmin } = useAuth();
@@ -83,50 +83,48 @@ export default function Dashboard() {
   };
 
   // Default computed values (from mock data)
- let totalOrders = visibleOrders.length;
-let statusCounts: Record<string, number> = {};
+  let totalOrders = visibleOrders.length;
+  let statusCounts: Record<string, number> = {};
 
-// Case 1: Backend returns array [{ status, count }]
-if (Array.isArray(server)) {
-  statusCounts = server.reduce(
-    (acc: Record<string, number>, item: any) => {
-      const key = String(item.status ?? '').toUpperCase().trim();
-      acc[key] = (acc[key] ?? 0) + toNumber(item.count ?? 0, 0);
+  // Case 1: Backend returns array [{ status, count }]
+  if (Array.isArray(server)) {
+    statusCounts = server.reduce(
+      (acc: Record<string, number>, item: any) => {
+        const key = String(item.status ?? '').toUpperCase().trim();
+        acc[key] = (acc[key] ?? 0) + toNumber(item.count ?? 0, 0);
+        return acc;
+      },
+      {}
+    );
+  }
+
+  // Case 2: Backend returns object-shaped response
+  else if ((server as any)?.statusCounts) {
+    statusCounts = Object.entries(
+      (server as any).statusCounts
+    ).reduce((acc, [key, value]) => {
+      acc[key.toUpperCase()] = toNumber(value, 0);
       return acc;
-    },
-    {}
-  );
-}
+    }, {} as Record<string, number>);
+  }
 
-// Case 2: Backend returns object-shaped response
-else if ((server as any)?.statusCounts) {
-  statusCounts = Object.entries(
-    (server as any).statusCounts
-  ).reduce((acc, [key, value]) => {
-    acc[key.toUpperCase()] = toNumber(value, 0);
-    return acc;
-  }, {} as Record<string, number>);
-}
-
-const STATUS_META: Record<string, { icon: any; color: string }> = {
-  ORDERED: { icon: Clock, color: 'text-status-review-awaited' },
-  REVIEWED: { icon: CheckCircle, color: 'text-status-reviewed' },
-  CORRECTED: { icon: CheckCircle, color: 'text-status-reviewed' },
-  PAID: { icon: DollarSign, color: 'text-status-paid' },
-  REFUNDED: { icon: DollarSign, color: 'text-status-paid' },
-  REVIEW_AWAITED: { icon: Clock, color: 'text-status-review-awaited' },
-  REFUND_DELAYED: { icon: Clock, color: 'text-status-review-awaited' },
-  COMISSION_COLLECTED: { icon: Clock, color: 'text-status-review-awaited' },
-  CANCELLED: { icon: X, color: 'text-status-cancelled' },
-  REFUNDED : { icon: DollarSign, color: 'text-status-paid' },
-
-
-};
+  const STATUS_META: Record<string, { icon: any; color: string }> = {
+    ORDERED: { icon: Package, color: 'text-status-ordered' },
+    REVIEWED: { icon: CheckCircle, color: 'text-status-reviewed' },
+    CORRECTED: { icon: CheckCircle, color: 'text-status-corrected' },
+    PAID: { icon: DollarSign, color: 'text-status-paid' },
+    REFUNDED: { icon: DollarSign, color: 'text-status-refunded' },
+    REVIEW_AWAITED: { icon: Clock, color: 'text-status-review-awaited' },
+    REFUND_DELAYED: { icon: AlertTriangle, color: 'text-status-refunded' },
+    REVIEW_DELAYED: { icon: AlertTriangle, color: 'text-status-review-awaited' },
+    COMISSION_COLLECTED: { icon: Coins, color: 'text-status-paid' },
+    CANCELLED: { icon: XCircle, color: 'text-status-cancelled' },
+  };
 
   // Build readable subtitles that include the original status names (humanized)
-  const pendingNames = ((statsData && (statsData.__pendingDisplay ?? PENDING_STATUSES)) || PENDING_STATUSES).map(humanizeStatus).join(', ');
-  const reviewedNames = ((statsData && (statsData.__reviewedDisplay ?? REVIEWED_STATUSES)) || REVIEWED_STATUSES).map(humanizeStatus).join(', ');
-  const completedNames = ((statsData && (statsData.__completedDisplay ?? COMPLETED_STATUSES)) || COMPLETED_STATUSES).map(humanizeStatus).join(', ');
+  const pendingNames = ((statsData && (statsData as any).__pendingDisplay) || PENDING_STATUSES).map(humanizeStatus).join(', ');
+  const reviewedNames = ((statsData && (statsData as any).__reviewedDisplay) || REVIEWED_STATUSES).map(humanizeStatus).join(', ');
+  const completedNames = ((statsData && (statsData as any).__completedDisplay) || COMPLETED_STATUSES).map(humanizeStatus).join(', ');
 
   // Map API orders (if present) into the app's Order shape and pick first 10
   const mapApiOrder = (o: any) => ({
@@ -148,17 +146,17 @@ const STATUS_META: Record<string, { icon: any; color: string }> = {
   });
 
   // Prefer API data for the Recent Orders listing; fall back to local mockOrders if absent
-let recentOrders = visibleOrders.slice(0, 10);
+  let recentOrders = visibleOrders.slice(0, 10);
 
-const totalFromApi =
-  Array.isArray(statsData)
-    ? statsData.find((i) => i.status === 'TOTAL')?.count ?? 0
-    : 0;
+  const totalFromApi =
+    Array.isArray(statsData)
+      ? statsData.find((i) => i.status === 'TOTAL')?.count ?? 0
+      : 0;
 
-if (Array.isArray(recentData)) {
-  const mapped = recentData.map(mapApiOrder);
-  recentOrders = mapped.slice(0, 10);
-}
+  if (Array.isArray(recentData)) {
+    const mapped = recentData.map(mapApiOrder);
+    recentOrders = mapped.slice(0, 10);
+  }
 
   return (
     <div className="min-h-screen">
@@ -189,7 +187,6 @@ if (Array.isArray(recentData)) {
             value={totalFromApi}
             subtitle={'All orders'}
             icon={Package}
-            // trend={{ value: 12, isPositive: true }}
             isLoading={statsLoading}
           />
 
@@ -202,53 +199,11 @@ if (Array.isArray(recentData)) {
                 .sort((a, b) => b.count - a.count);
 
               const iconFor = (statusKey: string) => {
-                switch (statusKey) {
-                  case 'ORDERED':
-                    return Package;
-                  case 'REVIEW_AWAITED':
-                    return Clock;
-                  case 'ORDERED_AWAITING':
-                    return Clock;
-                  case 'REVIEWED':
-                  case 'CORRECTED':
-                    return CheckCircle;
-                  case 'PAID':
-                  case 'REFUNDED':
-                    return DollarSign;
-                  case 'CANCELLED':
-                    return XCircle;
-                  case 'REFUND_DELAYED':
-                    return Clock;
-                  case 'COMISSION_COLLECTED' : 
-                    return TrendingUp;
-                  default:
-                    return Package;
-                }
+                return STATUS_META[statusKey]?.icon ?? Package;
               };
 
               const colorFor = (statusKey: string) => {
-                switch (statusKey) {
-                  case 'REVIEWED':
-                    return 'text-status-reviewed';
-                  case 'CORRECTED':
-                    return 'text-status-reviewed';
-                  case 'PAID':
-                  case 'REFUNDED':
-                    return 'text-status-paid';
-                  case 'ORDERED':
-                  case 'REVIEW_AWAITED':
-                    return 'text-status-review-awaited';
-                  case 'CANCELLED':
-                    return 'text-status-cancelled';
-                  case 'REFUND_DELAYED':
-                    return 'text-status-refund-delayed';
-                  case 'COMISSION_COLLECTED':
-                    return 'text-status-comission-collected';
-                  case 'REVIEW_DELAYED':
-                    return 'text-status-review-delayed';
-                  default:
-                    return 'text-primary';
-                }
+                return STATUS_META[statusKey]?.color ?? 'text-primary';
               };
 
               return entries.map((e) => (
@@ -266,26 +221,25 @@ if (Array.isArray(recentData)) {
           ) : (
             // Fallback to existing grouped cards when server shape isn't the array
             <>
-  {Object.entries(statusCounts).map(([status, count]) => {
-    const meta = STATUS_META[status] ?? {
-      icon: Package,
-      color: 'text-primary',
-    };
+              {Object.entries(statusCounts).map(([status, count]) => {
+                const meta = STATUS_META[status] ?? {
+                  icon: Package,
+                  color: 'text-primary',
+                };
 
-    return (
-      <StatsCard
-        key={status}
-        title={humanizeStatus(status)}
-        value={count}
-        subtitle={humanizeStatus(status)}
-        icon={meta.icon}
-        colorClass={meta.color}
-        isLoading={statsLoading}
-      />
-    );
-  })}
-</>
-
+                return (
+                  <StatsCard
+                    key={status}
+                    title={humanizeStatus(status)}
+                    value={count}
+                    subtitle={humanizeStatus(status)}
+                    icon={meta.icon}
+                    colorClass={meta.color}
+                    isLoading={statsLoading}
+                  />
+                );
+              })}
+            </>
           )}
         </section>
 

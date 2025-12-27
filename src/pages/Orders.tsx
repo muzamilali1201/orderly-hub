@@ -9,6 +9,17 @@ import { getOrders } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+interface OrdersResponse {
+  data?: any[];
+  totalPages?: number;
+  total_pages?: number;
+  total?: number;
+  count?: number;
+  total_count?: number;
+  totalCount?: number;
+  meta?: { total?: number };
+}
+
 export default function Orders() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -20,13 +31,13 @@ export default function Orders() {
 
   // Fetch orders from API (server paginated)
   const { toast } = useToast();
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<OrdersResponse | any[]>({
     queryKey: ['orders', { page, perPage }],
     queryFn: async () => {
       const res = await getOrders({ page, perPage });
       return res.data ?? res;
     },
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   // Show error toast once
@@ -37,12 +48,13 @@ export default function Orders() {
   }, [error]);
 
   // data may be an array or an object with { data: [...], total }
-  const rawOrders = Array.isArray(data) ? data : data?.data ?? [];
+  const rawOrders = Array.isArray(data) ? data : (data as OrdersResponse)?.data ?? [];
 
   // Prefer explicit page count from the server when provided (e.g., `totalPages`)
   // Fall back to a total-count (total, totalCount, total_count, meta.total) if present
-  const totalPagesCandidate = data?.totalPages ?? data?.total_pages ?? undefined;
-  const totalCountCandidate = data?.total ?? data?.count ?? data?.total_count ?? data?.meta?.total ?? data?.totalCount;
+  const dataObj = data as OrdersResponse | undefined;
+  const totalPagesCandidate = dataObj?.totalPages ?? dataObj?.total_pages ?? undefined;
+  const totalCountCandidate = dataObj?.total ?? dataObj?.count ?? dataObj?.total_count ?? dataObj?.meta?.total ?? dataObj?.totalCount;
 
   let totalPages: number | undefined;
   if (totalPagesCandidate != null) {
