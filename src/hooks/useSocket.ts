@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { OrderStatusPayload } from '@/types/order';
 
 // Get socket URL from environment or default to localhost
-const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL as string)?.replace('/api/v1', '') ?? 'http://localhost:3001';
+const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL as string)?.replace('/api/v1', '') ?? 'http://localhost:3000';
 
 // Singleton socket instance
 let socketInstance: Socket | null = null;

@@ -15,7 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
-import { StatusTimeline } from '@/components/StatusTimeline';
+// import { StatusTimeline } from '@/components/StatusTimeline';
 import { OrderStatus } from '@/types/order';
 import {
   Select,
@@ -349,9 +349,9 @@ export default function OrderDetails() {
             </div>
 
             {/* Status Timeline */}
-            <div className="rounded-xl border border-border bg-card p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
+            {/* <div className="rounded-xl border border-border bg-card p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
               <StatusTimeline history={order.statusHistory} />
-            </div>
+            </div> */}
           </div>
         </div>
       </main>
