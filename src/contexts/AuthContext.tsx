@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { User, UserRole } from '@/types/order';
 import { registerUser, loginUser } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -39,6 +40,7 @@ const mockUsers: Record<string, { password: string; user: User }> = {
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(() => {
     try {
       const raw = localStorage.getItem('user');
@@ -48,6 +50,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Listen for auth logout events (from 401 interceptor)
+  useEffect(() => {
+    const handleAuthLogout = (event: CustomEvent<{ message: string }>) => {
+      toast({
+        title: 'Session Expired',
+        description: event.detail.message || 'Your session has expired. Please log in again.',
+        variant: 'destructive',
+      });
+      setUser(null);
+      // Redirect to login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    };
+
+    window.addEventListener('auth:logout', handleAuthLogout as EventListener);
+    return () => {
+      window.removeEventListener('auth:logout', handleAuthLogout as EventListener);
+    };
+  }, [toast]);
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);

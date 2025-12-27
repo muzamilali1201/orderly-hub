@@ -6,11 +6,9 @@ export type OrderStatus =
   | 'REFUNDED' 
   | 'PAID' 
   | 'CANCELLED'
-  | "REFUNDED"
-  | "REVIEWED"
-  | "COMISSION_COLLECTED"
-  | "REVIEW_DELAYED"
-  | 'REFUND_DELAYED'
+  | 'COMISSION_COLLECTED'
+  | 'REVIEW_DELAYED'
+  | 'REFUND_DELAYED';
 
 export type UserRole = 'admin' | 'user';
 
@@ -59,4 +57,33 @@ export interface CreateOrderData {
   buyerPaypal: string;
   comments?: string;
   screenshots: File[];
+}
+
+// Socket.IO event payload types
+export interface OrderStatusPayload {
+  orderId: string;
+  previousStatus: string;
+  newStatus: string;
+  changedBy?: {
+    id: string;
+    username: string;
+    role: 'admin' | 'user';
+  };
+  role?: string;
+  createdAt: string;
+}
+
+export interface AlertNotification {
+  id: string;
+  orderId: string;
+  previousStatus: string;
+  newStatus: string;
+  changedBy?: {
+    id: string;
+    username: string;
+    role: 'admin' | 'user';
+  };
+  role?: string;
+  createdAt: string;
+  read: boolean;
 }

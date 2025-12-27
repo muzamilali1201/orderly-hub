@@ -22,6 +22,38 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor to handle 401 errors (token expired)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const message = error.response?.data?.message || 'Your session has expired. Please log in again.';
+      
+      // Clear auth data
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      } catch (e) {
+        // ignore storage errors
+      }
+
+      // Create custom error with clear message
+      const authError = new Error(message);
+      (authError as any).isAuthError = true;
+      (authError as any).status = 401;
+
+      // Redirect to login page
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        // Dispatch custom event for auth context to handle
+        window.dispatchEvent(new CustomEvent('auth:logout', { detail: { message } }));
+      }
+
+      return Promise.reject(authError);
+    }
+    return Promise.reject(error);
+  }
+);
+
 // --- Auth endpoints ---
 export interface RegisterPayload {
   username: string;

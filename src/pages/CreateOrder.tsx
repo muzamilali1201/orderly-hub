@@ -69,7 +69,7 @@ export default function CreateOrder() {
       });
 
       // refresh list
-      queryClient.invalidateQueries(['orders']);
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
 
       setIsSubmitting(false);
       navigate('/orders');
