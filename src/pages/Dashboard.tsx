@@ -189,7 +189,7 @@ if (Array.isArray(recentData)) {
             value={totalFromApi}
             subtitle={'All orders'}
             icon={Package}
-            trend={{ value: 12, isPositive: true }}
+            // trend={{ value: 12, isPositive: true }}
             isLoading={statsLoading}
           />
 
