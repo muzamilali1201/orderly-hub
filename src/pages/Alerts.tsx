@@ -1,19 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAlertHistory } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { StatusHistoryEntry } from '@/types/order';
 import { StatusBadge } from '@/components/StatusBadge';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wifi, WifiOff } from 'lucide-react';
 import { formatInTimeZone } from 'date-fns-tz';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { NotificationBell } from '@/components/NotificationBell';
+import { useNavigate } from 'react-router-dom';
 
 const PAKISTAN_TZ = 'Asia/Karachi';
 
 export default function Alerts() {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { notifications, isConnected } = useNotifications();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -21,7 +25,7 @@ export default function Alerts() {
   // Use 'ALL' as the sentinel for no-status filter (Select requires non-empty values)
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  const { data, isLoading, error, isFetching } = useQuery({
+  const { data, isLoading, error, isFetching, refetch } = useQuery({
     queryKey: ['alert-history', { page, perPage, orderFilter, statusFilter }],
     queryFn: async () => {
       // Use the new /alert/history API
@@ -29,6 +33,13 @@ export default function Alerts() {
       return res.data ?? res;
     },
   });
+
+  // Refetch when new notifications arrive (real-time update)
+  useEffect(() => {
+    if (notifications.length > 0) {
+      refetch();
+    }
+  }, [notifications.length, refetch]);
 
   useEffect(() => {
     if (error) {
@@ -66,31 +77,17 @@ export default function Alerts() {
     <div className="min-h-screen">
       <header className="border-b border-border bg-card/50 sticky top-0 z-10">
         <div className="px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Alerts</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Recent status changes across orders</p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Alerts</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Recent status changes across orders</p>
+            </div>
+            <span className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${isConnected ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground'}`}>
+              {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+              {isConnected ? 'Live' : 'Offline'}
+            </span>
           </div>
           <div className="flex items-center gap-3">
-            {/* <div className="w-48">
-              <Input placeholder="Filter by Order ID" value={orderFilter} onChange={(e) => { setOrderFilter(e.target.value); setPage(1); }} />
-            </div> */}
-            {/* <div className="w-40">
-              <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Statuses</SelectItem>
-                  <SelectItem value="ORDERED">Ordered</SelectItem>
-                  <SelectItem value="REVIEWED">Reviewed</SelectItem>
-                  <SelectItem value="REVIEW_AWAITED">Review Awaited</SelectItem>
-                  <SelectItem value="CORRECTED">Corrected</SelectItem>
-                  <SelectItem value="PAID">Paid</SelectItem>
-                  <SelectItem value="REFUNDED">Refunded</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div> */}
             <div className="w-28">
               <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
                 <SelectTrigger className="w-full">
@@ -103,6 +100,7 @@ export default function Alerts() {
                 </SelectContent>
               </Select>
             </div>
+            <NotificationBell />
           </div>
         </div>
       </header>
@@ -125,7 +123,7 @@ export default function Alerts() {
                   <tr><td colSpan={5} className="px-6 py-16 text-center">{isLoading ? 'Loading...' : 'No alerts found'}</td></tr>
                 ) : (
                   entries.map((e) => (
-                    <tr key={e.id} className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => { /* navigate to order if needed */ }}>
+                    <tr key={e.id} className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => e.orderId && navigate(`/orders/${e.orderId}`)}>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-medium text-foreground">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
