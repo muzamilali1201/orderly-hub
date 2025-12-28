@@ -42,19 +42,21 @@ import { cn } from '@/lib/utils';
 const PAKISTAN_TZ = 'Asia/Karachi';
 
 const adminStatuses: OrderStatus[] = [
-  'ORDERED',
-  'REVIEWED',
-  'REVIEW_AWAITED',
-  'CORRECTED',
-  'REFUNDED',
-  'PAID',
-  'CANCELLED',
-  'COMISSION_COLLECTED',
-  'REVIEW_DELAYED',
-  'REFUND_DELAYED'
-];
+        "ORDERED",
+        "REVIEWED",
+        "REVIEW_AWAITED",
+        "REFUND_DELAYED",
+        "REFUNDED",
+        "CORRECTED",
+        "CANCELLED",
+        "COMISSION_COLLECTED",
+        "PAID",
+        "SEND_TO_SELLER",
+        "HOLD",
+        "SENT"
+      ];
 
-const userStatuses: OrderStatus[] = ['REVIEWED', 'CORRECTED', 'CANCELLED'];
+const userStatuses: OrderStatus[] = ['REVIEWED', 'ORDERED', 'CANCELLED',"REFUND_DELAYED"];
 
 export default function OrderDetails() {
   const { id } = useParams();

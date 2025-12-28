@@ -83,6 +83,24 @@ const statusConfig: Record<OrderStatus, {
     bgClass: 'bg-status-refunded/15 border-status-refunded/30',
     icon: AlertTriangle,
   },
+  SENT: {
+    label: 'Sent',
+    colorClass: 'text-status-sent',
+    bgClass: 'bg-status-sent/15 border-status-sent/30',
+    icon: RefreshCcw,
+  },
+  SEND_TO_SELLER: {
+    label: 'Send to Seller',
+    colorClass: 'text-status-send-to-seller',
+    bgClass: 'bg-status-refunded/15 border-status-send-to-seller/30',
+    icon: RefreshCcw,
+  },
+  HOLD: {
+    label: 'Hold',
+    colorClass: 'text-status-hold',
+    bgClass: 'bg-status-review-awaited/15 border-status-hold/30',
+    icon: AlertTriangle,
+  }
 };
 
 const sizeClasses = {
