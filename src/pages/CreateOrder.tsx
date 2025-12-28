@@ -22,6 +22,7 @@ export default function CreateOrder() {
     orderName: '',
     amazonOrderNumber: '',
     buyerPaypal: '',
+    buyerName: '',
     comments: '',
   });
   const [orderScreenshot, setOrderScreenshot] = useState<File | null>(null);
@@ -49,6 +50,7 @@ export default function CreateOrder() {
       form.append('orderName', formData.orderName);
       form.append('amazonOrderNo', formData.amazonOrderNumber);
       form.append('buyerPaypal', formData.buyerPaypal);
+      if (formData.buyerName) form.append('buyerName', formData.buyerName);
       if (formData.comments) form.append('comments', formData.comments);
 
       // Attach screenshots
@@ -166,7 +168,7 @@ export default function CreateOrder() {
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="buyerPaypal">
                   Buyer PayPal <span className="text-destructive">*</span>
                 </Label>
@@ -178,6 +180,17 @@ export default function CreateOrder() {
                   value={formData.buyerPaypal}
                   onChange={handleChange}
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="buyerName">Buyer Name</Label>
+                <Input
+                  id="buyerName"
+                  name="buyerName"
+                  placeholder="e.g., John Doe"
+                  value={formData.buyerName}
+                  onChange={handleChange}
                 />
               </div>
 

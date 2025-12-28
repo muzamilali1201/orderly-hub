@@ -108,7 +108,15 @@ export async function getAlertHistory(params?: { page?: number; perPage?: number
   return api.get('/alert/history', { params });
 }
 
-export async function updateOrderStatus(orderId: string, status: string) {
+export async function updateOrderStatus(orderId: string, status: string, refundScreenshot?: File) {
+  if (refundScreenshot) {
+    const form = new FormData();
+    form.append('status', status);
+    form.append('RefundSS', refundScreenshot);
+    return api.put(`/order/${orderId}`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
   return api.put(`/order/${orderId}`, { status });
 }
 
