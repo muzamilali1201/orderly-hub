@@ -100,8 +100,7 @@ export default function OrderDetails() {
     buyerName: o.buyerName,
     status: o.status,
     comments: o.comments,
-    screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),
-    refundScreenshot: o.RefundSS ?? o.refundScreenshot,
+    screenshots: [{url : o.OrderSS, name : "Order"}, {url : o.AmazonProductSS, name : "Amazon Product"}, {url : o.RefundSS, name : "Refund"}].filter(Boolean),
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,
       username: o.userId?.username ?? o.createdBy?.username,
@@ -113,6 +112,7 @@ export default function OrderDetails() {
   });
 
   const order = data ? mapOrder(data) : null;
+  console.log(order)
 
   const queryClient = useQueryClient();
 
@@ -318,19 +318,32 @@ export default function OrderDetails() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {order.screenshots.map((screenshot, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => { setActiveIndex(index); setLightboxOpen(true); }}
-                      className="aspect-video rounded-lg border border-border bg-muted overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors p-0"
-                    >
-                      <img
-                        src={screenshot}
-                        alt={`Screenshot ${index + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </button>
-                  ))}
+  <div key={index} className="space-y-1">
+    <button
+      type="button"
+      onClick={() => {
+        setActiveIndex(index);
+        setLightboxOpen(true);
+      }}
+      className="aspect-video w-full rounded-lg border border-border bg-muted 
+                 overflow-hidden group cursor-pointer hover:border-primary/50 
+                 transition-colors p-0"
+    >
+      <img
+        src={screenshot.url}
+        alt={screenshot.name || `Screenshot ${index + 1}`}
+        className="w-full h-full object-cover group-hover:scale-105 
+                   transition-transform duration-300"
+      />
+    </button>
+
+    {/* Screenshot name */}
+    <p className="text-xs text-muted-foreground truncate">
+      {screenshot.name}
+    </p>
+  </div>
+))}
+
                 </div>
               </div>
             )}
@@ -377,7 +390,7 @@ export default function OrderDetails() {
                       onFilesChange={(files) => setRefundScreenshot(files[0] ?? null)}
                       maxFiles={1}
                     />
-                    {order.refundScreenshot && (
+                    {/* {order.refundScreenshot && (
                       <div className="mt-2">
                         <p className="text-xs text-muted-foreground mb-1">Current Refund Screenshot:</p>
                         <button
@@ -392,7 +405,7 @@ export default function OrderDetails() {
                           />
                         </button>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
 
@@ -406,9 +419,13 @@ export default function OrderDetails() {
             </div>
 
             {/* Status Timeline */}
-            <div className="rounded-xl border border-border bg-card p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-              <StatusTimeline history={order.statusHistory} />
-            </div>
+            <div
+  className="rounded-xl border border-border bg-card p-6 animate-slide-up
+             max-h-[420px] overflow-y-auto"
+  style={{ animationDelay: '200ms' }}
+>
+  <StatusTimeline history={order.statusHistory} />
+</div>
           </div>
         </div>
       </main>
@@ -418,7 +435,7 @@ export default function OrderDetails() {
         <DialogContent className="w-full max-w-5xl p-0 bg-transparent shadow-none">
           <div className="relative flex items-center justify-center bg-black/80 p-4">
             <img
-              src={order.screenshots[activeIndex]}
+              src={order.screenshots[activeIndex]?.url}
               alt={`Screenshot ${activeIndex + 1}`}
               className="max-h-[80vh] w-auto max-w-full object-contain"
             />
