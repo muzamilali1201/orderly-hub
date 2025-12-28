@@ -46,7 +46,7 @@ export default function Alerts() {
   const formatDateTime = (d: string) => formatInTimeZone(new Date(d), PAKISTAN_TZ, 'MMM d, yyyy h:mm a');
 
   // Map /alert/history response shape to StatusHistoryEntry
-  const entries: Array<StatusHistoryEntry & { orderName?: string; amazonOrderNo?: string }> = (raw as any[]).map((e) => ({
+  const entries: StatusHistoryEntry[] = (raw as any[]).map((e) => ({
     id: e._id ?? e.id,
     orderId: (e.orderId && (typeof e.orderId === 'object') ? (e.orderId._id ?? e.orderId.id) : (e.orderId ?? e.order_id ?? e.order)) as string,
     // prefer orderName/title if server provides it; fallback to amazonOrderNo for display
@@ -129,11 +129,11 @@ export default function Alerts() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-medium text-foreground">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
-                          <code className="text-sm bg-muted px-2 py-1 rounded font-mono">{e.orderId}</code>
+                          <code className="text-sm bg-muted px-2 py-1 rounded font-mono">{e.orderId ?? ''}</code>
                         </div>
                       </td>
-                      <td className="px-6 py-4"><StatusBadge status={(e.fromStatus as any) ?? 'ORDERED'} size="sm" /></td>
-                      <td className="px-6 py-4"><StatusBadge status={(e.toStatus as any)} size="sm" /></td>
+                      <td className="px-6 py-4"><StatusBadge status={(e.fromStatus ?? e.previousStatus ?? 'ORDERED') as any} size="sm" /></td>
+                      <td className="px-6 py-4"><StatusBadge status={(e.toStatus ?? e.newStatus ?? 'ORDERED') as any} size="sm" /></td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">{e.changedBy.username} <span className="text-xs text-muted-foreground/70">({e.changedBy.role})</span></td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateTime(e.changedAt)}</td>
                     </tr>

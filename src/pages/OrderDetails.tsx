@@ -9,7 +9,8 @@ import {
   User,
   Image,
   MessageSquare,
-  Loader2
+  Loader2,
+  Upload
 } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +19,8 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { StatusTimeline } from '@/components/StatusTimeline';
 import { OrderStatus } from '@/types/order';
+import { Label } from '@/components/ui/label';
+import { FileUpload } from '@/components/FileUpload';
 import {
   Select,
   SelectContent,
@@ -65,6 +68,7 @@ export default function OrderDetails() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
+  const [refundScreenshot, setRefundScreenshot] = useState<File | null>(null);
 
   // Lightbox state for viewing screenshots
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -93,10 +97,11 @@ export default function OrderDetails() {
     orderName: o.orderName,
     amazonOrderNumber: o.amazonOrderNo ?? o.amazonOrderNumber,
     buyerPaypal: o.buyerPaypal,
-    buyerName : o.buyerName,
+    buyerName: o.buyerName,
     status: o.status,
     comments: o.comments,
     screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),
+    refundScreenshot: o.RefundSS ?? o.refundScreenshot,
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,
       username: o.userId?.username ?? o.createdBy?.username,
@@ -173,12 +178,15 @@ export default function OrderDetails() {
     setShowConfirm(false);
 
     try {
-      await import('@/lib/api').then((m) => m.updateOrderStatus(order.id, pendingStatus));
+      await import('@/lib/api').then((m) => m.updateOrderStatus(order.id, pendingStatus, refundScreenshot ?? undefined));
 
       toast({
         title: 'Status updated',
         description: `Order status changed to ${pendingStatus.replace('_', ' ')}`,
       });
+
+      // Reset refund screenshot
+      setRefundScreenshot(null);
 
       // Refresh both single order and orders list
       await refetch();
@@ -356,6 +364,37 @@ export default function OrderDetails() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                {/* Refund Screenshot Upload - Admin Only */}
+                {isAdmin && (
+                  <div className="pt-3 border-t border-border space-y-2">
+                    <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      Refund Screenshot (optional)
+                    </Label>
+                    <FileUpload
+                      files={refundScreenshot ? [refundScreenshot] : []}
+                      onFilesChange={(files) => setRefundScreenshot(files[0] ?? null)}
+                      maxFiles={1}
+                    />
+                    {order.refundScreenshot && (
+                      <div className="mt-2">
+                        <p className="text-xs text-muted-foreground mb-1">Current Refund Screenshot:</p>
+                        <button
+                          type="button"
+                          onClick={() => { setActiveIndex(order.screenshots.length); setLightboxOpen(true); }}
+                          className="w-20 h-14 rounded border border-border overflow-hidden hover:border-primary/50 transition-colors"
+                        >
+                          <img
+                            src={order.refundScreenshot}
+                            alt="Refund Screenshot"
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {isUpdating && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -25,13 +25,19 @@ export interface User {
 
 export interface StatusHistoryEntry {
   id: string;
-  previousStatus: OrderStatus;
-  newStatus: OrderStatus;
+  orderId?: string;
+  previousStatus?: OrderStatus | null;
+  newStatus?: OrderStatus;
+  fromStatus?: OrderStatus | null;
+  toStatus?: OrderStatus;
   changedBy: {
+    id?: string;
     username: string;
     role: 'admin' | 'user' | 'system';
   };
   changedAt: string;
+  orderName?: string;
+  amazonOrderNo?: string;
 }
 
 export interface Order {
@@ -39,10 +45,11 @@ export interface Order {
   orderName: string;
   amazonOrderNumber: string;
   buyerPaypal: string;
-  buyerName: string;
+  buyerName?: string;
   status: OrderStatus;
   comments?: string;
   screenshots: string[];
+  refundScreenshot?: string;
   createdBy: {
     id: string;
     username: string;
