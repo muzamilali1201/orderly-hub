@@ -52,21 +52,19 @@ interface OrdersTableProps {
 const PAKISTAN_TZ = 'Asia/Karachi';
 
 const statuses: (OrderStatus | 'ALL')[] = [
-  'ALL',
-  'ORDERED',
-  'REVIEWED',
-  'REVIEW_AWAITED',
-  'CORRECTED',
-  'REFUNDED',
-  'PAID',
-  'CANCELLED',
-  "REFUNDED",
-  "REVIEWED",
-  "COMISSION_COLLECTED",
-  "REVIEW_DELAYED",
-  "REFUND_DELAYED",
-  
-];
+        "ORDERED",
+        "REVIEWED",
+        "REVIEW_AWAITED",
+        "REFUND_DELAYED",
+        "REFUNDED",
+        "CORRECTED",
+        "CANCELLED",
+        "COMISSION_COLLECTED",
+        "PAID",
+        "SEND_TO_SELLER",
+        "HOLD",
+        "SENT"
+      ];
 
 const ITEMS_PER_PAGE = 10;
 
@@ -86,6 +84,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
       order.orderName.toLowerCase().includes(search.toLowerCase()) ||
       order.amazonOrderNumber.toLowerCase().includes(search.toLowerCase()) ||
       order.buyerPaypal.toLowerCase().includes(search.toLowerCase()) ||
+      order.buyerName.toLowerCase().includes(search.toLowerCase()) ||
       order.createdBy.email.toLowerCase().includes(search.toLowerCase()) ||
       order.createdBy.username.toLowerCase().includes(search.toLowerCase()) ||
       order.id.toString().includes(search);
@@ -162,6 +161,9 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                   ID
                 </th>
                 <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Buyer Name
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Buyer PayPal
                 </th>
                 <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -209,11 +211,11 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                         {order.screenshots && order.screenshots.length > 0 ? (
                           <button
                             type="button"
-                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[0]); setPreviewOpen(true); }}
+                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[1]); setPreviewOpen(true); }}
                             className="w-12 h-12 rounded-md overflow-hidden bg-muted flex items-center justify-center hover:scale-105 transition-transform"
                             title="View screenshot"
                           >
-                            <img src={order.screenshots[0]} alt={`Screenshot for ${order.orderName}`} className="w-full h-full object-cover" />
+                            <img src={order.screenshots[1]} alt={`Screenshot for ${order.orderName}`} className="w-full h-full object-cover" />
                           </button>
                         ) : (
                           <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
@@ -239,6 +241,11 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                     <td className="px-6 py-4">
                       <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
                         {order.id}
+                      </code>
+                    </td>
+                    <td className="px-6 py-4">
+                      <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
+                        {order.buyerName}
                       </code>
                     </td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">

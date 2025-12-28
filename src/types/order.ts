@@ -8,7 +8,10 @@ export type OrderStatus =
   | 'CANCELLED'
   | 'COMISSION_COLLECTED'
   | 'REVIEW_DELAYED'
-  | 'REFUND_DELAYED';
+  | 'REFUND_DELAYED'
+  | 'SEND_TO_SELLER'
+  |      'HOLD'
+  |      'SENT'
 
 export type UserRole = 'admin' | 'user';
 
@@ -22,13 +25,11 @@ export interface User {
 
 export interface StatusHistoryEntry {
   id: string;
-  orderId: string;
-  fromStatus: OrderStatus | null;
-  toStatus: OrderStatus;
+  previousStatus: OrderStatus;
+  newStatus: OrderStatus;
   changedBy: {
-    id: string;
     username: string;
-    role: UserRole;
+    role: 'admin' | 'user' | 'system';
   };
   changedAt: string;
 }
@@ -38,6 +39,7 @@ export interface Order {
   orderName: string;
   amazonOrderNumber: string;
   buyerPaypal: string;
+  buyerName: string;
   status: OrderStatus;
   comments?: string;
   screenshots: string[];

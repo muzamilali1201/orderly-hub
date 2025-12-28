@@ -77,6 +77,7 @@ export default function Orders() {
     orderName: o.orderName,
     amazonOrderNumber: o.amazonOrderNo ?? o.amazonOrderNumber,
     buyerPaypal: o.buyerPaypal,
+    buyerName : o.buyerName,
     status: o.status,
     comments: o.comments,
     screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),

@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
-// import { StatusTimeline } from '@/components/StatusTimeline';
+import { StatusTimeline } from '@/components/StatusTimeline';
 import { OrderStatus } from '@/types/order';
 import {
   Select,
@@ -49,6 +49,9 @@ const adminStatuses: OrderStatus[] = [
   'REFUNDED',
   'PAID',
   'CANCELLED',
+  'COMISSION_COLLECTED',
+  'REVIEW_DELAYED',
+  'REFUND_DELAYED'
 ];
 
 const userStatuses: OrderStatus[] = ['REVIEWED', 'CORRECTED', 'CANCELLED'];
@@ -88,6 +91,7 @@ export default function OrderDetails() {
     orderName: o.orderName,
     amazonOrderNumber: o.amazonOrderNo ?? o.amazonOrderNumber,
     buyerPaypal: o.buyerPaypal,
+    buyerName : o.buyerName,
     status: o.status,
     comments: o.comments,
     screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),
@@ -254,6 +258,14 @@ export default function OrderDetails() {
                     <span className="text-muted-foreground ml-1">({order.createdBy.email})</span>
                   </p>
                 </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                    <User className="w-4 h-4" /> Buyer Name
+                  </p>
+                  <p className="text-foreground">
+                    {order.buyerName}
+                  </p>
+                </div>
 
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground flex items-center gap-1.5">
@@ -353,9 +365,9 @@ export default function OrderDetails() {
             </div>
 
             {/* Status Timeline */}
-            {/* <div className="rounded-xl border border-border bg-card p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
+            <div className="rounded-xl border border-border bg-card p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
               <StatusTimeline history={order.statusHistory} />
-            </div> */}
+            </div>
           </div>
         </div>
       </main>
