@@ -100,7 +100,11 @@ export default function OrderDetails() {
     buyerName: o.buyerName,
     status: o.status,
     comments: o.comments,
-    screenshots: [{url : o.OrderSS, name : "Order"}, {url : o.AmazonProductSS, name : "Amazon Product"}, {url : o.RefundSS, name : "Refund"}].filter(Boolean),
+    screenshots: [
+    { url: o.OrderSS, name: "Order" },
+    { url: o.AmazonProductSS, name: "Amazon Product" },
+    { url: o.RefundSS, name: "Refund" },
+  ].filter((s) => Boolean(s.url)),
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,
       username: o.userId?.username ?? o.createdBy?.username,
