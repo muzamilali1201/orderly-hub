@@ -20,7 +20,7 @@ export default function Alerts() {
   const { notifications, isConnected } = useNotifications();
 
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [perPage, setPerPage] = useState(25);
   const [orderFilter, setOrderFilter] = useState('');
   // Use 'ALL' as the sentinel for no-status filter (Select requires non-empty values)
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -111,7 +111,7 @@ export default function Alerts() {
             <table className="w-full">
               <thead>
                 <tr className="bg-muted/50 border-b border-border">
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order ID</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">From</th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">To</th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Changed By</th>
@@ -127,7 +127,7 @@ export default function Alerts() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-medium text-foreground">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
-                          <code className="text-sm bg-muted px-2 py-1 rounded font-mono">{e.orderId ?? ''}</code>
+                          {/* <code className="text-sm bg-muted px-2 py-1 rounded font-mono">{e.orderId ?? ''}</code> */}
                         </div>
                       </td>
                       <td className="px-6 py-4"><StatusBadge status={(e.fromStatus ?? e.previousStatus ?? 'ORDERED') as any} size="sm" /></td>

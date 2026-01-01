@@ -47,15 +47,15 @@ const PAKISTAN_TZ = 'Asia/Karachi';
 const adminStatuses: OrderStatus[] = [
         "ORDERED",
         "REVIEWED",
+        "SEND_TO_SELLER",
+        "ON HOLD",
         "REVIEW_AWAITED",
         "REFUND_DELAYED",
         "REFUNDED",
         "CORRECTED",
         "CANCELLED",
-        "COMISSION_COLLECTED",
+        "COMMISSION_COLLECTED",
         "PAID",
-        "SEND_TO_SELLER",
-        "HOLD",
         "SENT"
       ];
 

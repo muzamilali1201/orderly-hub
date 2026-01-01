@@ -142,7 +142,7 @@ export default function CreateOrder() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="orderName">
-                  Order Name <span className="text-destructive">*</span>
+                  Product Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="orderName"

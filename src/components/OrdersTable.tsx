@@ -54,15 +54,15 @@ const PAKISTAN_TZ = 'Asia/Karachi';
 const statuses: (OrderStatus | 'ALL')[] = [
         "ORDERED",
         "REVIEWED",
+        "SEND_TO_SELLER",
+        "ON HOLD",
         "REVIEW_AWAITED",
         "REFUND_DELAYED",
         "REFUNDED",
         "CORRECTED",
         "CANCELLED",
-        "COMISSION_COLLECTED",
+        "COMMISSION_COLLECTED",
         "PAID",
-        "SEND_TO_SELLER",
-        "HOLD",
         "SENT"
       ];
 
@@ -103,7 +103,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
   const paginatedOrders = isServer ? filteredOrders : filteredOrders.slice((currentPage - 1) * ITEMS_PER_PAGE, (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE);
 
   const formatDate = (dateString: string) => {
-    return formatInTimeZone(new Date(dateString), PAKISTAN_TZ, 'MMM d, yyyy h:mm a');
+    return formatInTimeZone(new Date(dateString), PAKISTAN_TZ, 'd MMM, yyyy h:mm a');
   };
 
   return (
@@ -158,9 +158,6 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                   Amazon #
                 </th>
                 <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Buyer Name
                 </th>
                 <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -204,7 +201,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                       'animate-slide-up'
                     )}
                     style={{ animationDelay: `${index * 50}ms` }}
-                    onClick={() => navigate(`/orders/${order.id}`)}
+                    // onClick={() => navigate(`/orders/${order.id}`)}
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
@@ -236,11 +233,6 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                     <td className="px-6 py-4">
                       <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
                         {order.amazonOrderNumber}
-                      </code>
-                    </td>
-                    <td className="px-6 py-4">
-                      <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
-                        {order.id}
                       </code>
                     </td>
                     <td className="px-6 py-4">

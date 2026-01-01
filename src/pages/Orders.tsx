@@ -28,7 +28,7 @@ export default function Orders() {
   // Server-side pagination state
   const [page, setPage] = useState(1);
   // Per-page selection (user configurable)
-  const [perPage, setPerPage] = useState(10);
+  const [perPage, setPerPage] = useState(25);
 
   // Fetch orders from API (server paginated)
   const { toast } = useToast();

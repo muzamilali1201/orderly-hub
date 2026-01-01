@@ -6,11 +6,11 @@ export type OrderStatus =
   | 'REFUNDED' 
   | 'PAID' 
   | 'CANCELLED'
-  | 'COMISSION_COLLECTED'
+  | 'COMMISSION_COLLECTED'
   | 'REVIEW_DELAYED'
   | 'REFUND_DELAYED'
   | 'SEND_TO_SELLER'
-  |      'HOLD'
+  |      'ON HOLD'
   |      'SENT'
 
 export type UserRole = 'admin' | 'user';
