@@ -120,4 +120,14 @@ export async function updateOrderStatus(orderId: string, status: string, refundS
   return api.put(`/order/${orderId}`, { status });
 }
 
+// Add comment to an order
+export async function addComment(orderId: string, comment: string) {
+  return api.post(`/order/${orderId}/comment`, { comment });
+}
+
+// Delete an order
+export async function deleteOrder(orderId: string) {
+  return api.delete(`/order/${orderId}`);
+}
+
 export default api;

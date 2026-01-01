@@ -18,7 +18,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { StatusTimeline } from '@/components/StatusTimeline';
-import { OrderStatus } from '@/types/order';
+import { CommentSection } from '@/components/CommentSection';
+import { OrderStatus, CommentEntry } from '@/types/order';
 import { Label } from '@/components/ui/label';
 import { FileUpload } from '@/components/FileUpload';
 import {
@@ -69,6 +70,7 @@ export default function OrderDetails() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
   const [refundScreenshot, setRefundScreenshot] = useState<File | null>(null);
+  const [isAddingComment, setIsAddingComment] = useState(false);
 
   // Lightbox state for viewing screenshots
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -100,6 +102,7 @@ export default function OrderDetails() {
     buyerName: o.buyerName,
     status: o.status,
     comments: o.comments,
+    commentsHistory: (o.commentsHistory ?? []) as CommentEntry[],
     screenshots: [
     { url: o.OrderSS, name: "Order" },
     { url: o.AmazonProductSS, name: "Amazon Product" },
@@ -201,6 +204,24 @@ export default function OrderDetails() {
     } finally {
       setIsUpdating(false);
       setPendingStatus(null);
+    }
+  };
+
+  const handleAddComment = async (comment: string) => {
+    if (!order) return;
+    setIsAddingComment(true);
+    try {
+      await import('@/lib/api').then((m) => m.addComment(order.id, comment));
+      toast({
+        title: 'Comment added',
+        description: 'Your comment has been added to the order.',
+      });
+      await refetch();
+    } catch (err) {
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to add comment';
+      toast({ title: 'Failed to add comment', description: message, variant: 'destructive' });
+    } finally {
+      setIsAddingComment(false);
     }
   };
 
@@ -351,6 +372,15 @@ export default function OrderDetails() {
                 </div>
               </div>
             )}
+
+            {/* Comments Section */}
+            <div className="animate-slide-up" style={{ animationDelay: '150ms' }}>
+              <CommentSection
+                comments={order.commentsHistory || []}
+                onAddComment={handleAddComment}
+                isSubmitting={isAddingComment}
+              />
+            </div>
           </div>
 
           {/* Right Column - Status & Actions */}

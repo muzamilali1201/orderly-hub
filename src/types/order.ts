@@ -40,6 +40,17 @@ export interface StatusHistoryEntry {
   amazonOrderNo?: string;
 }
 
+export interface CommentEntry {
+  _id?: string;
+  comment: string;
+  commentedBy: {
+    _id?: string;
+    username: string;
+  };
+  role: 'admin' | 'user' | 'system';
+  commentedAt: string;
+}
+
 export interface Order {
   id: string;
   orderName: string;
