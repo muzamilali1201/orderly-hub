@@ -65,7 +65,7 @@ const statusConfig: Record<OrderStatus, {
     bgClass: 'bg-status-cancelled/15 border-status-cancelled/30',
     icon: XCircle,
   },
-  COMISSION_COLLECTED: {
+  COMMISSION_COLLECTED: {
     label: 'Commission Collected',
     colorClass: 'text-status-paid',
     bgClass: 'bg-status-paid/15 border-status-paid/30',
@@ -95,7 +95,7 @@ const statusConfig: Record<OrderStatus, {
     bgClass: 'bg-status-refunded/15 border-status-send-to-seller/30',
     icon: RefreshCcw,
   },
-  HOLD: {
+  'ON HOLD': {
     label: 'Hold',
     colorClass: 'text-status-hold',
     bgClass: 'bg-status-review-awaited/15 border-status-hold/30',

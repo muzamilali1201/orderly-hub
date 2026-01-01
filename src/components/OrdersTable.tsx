@@ -9,7 +9,9 @@ import {
   ChevronRight,
   Eye,
   MoreHorizontal,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import { Order, OrderStatus } from '@/types/order';
 import { StatusBadge } from './StatusBadge';
@@ -27,8 +29,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { deleteOrder } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface OrdersTableProps {
   orders: Order[];
@@ -70,6 +86,8 @@ const ITEMS_PER_PAGE = 10;
 
 export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginated = false, currentPage: currentPageProp = 1, totalPages: totalPagesProp, onPageChange, isLoading = false, hasMore = false }: OrdersTableProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,6 +95,11 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
   // Screenshot preview/lightbox state
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Filter orders (client-side filtering still applies to the current page of orders)
   const filteredOrders = orders.filter((order) => {
@@ -264,6 +287,22 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
+                          {isAdmin && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOrderToDelete(order);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Order
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -357,6 +396,58 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
         )}
 
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete order "{orderToDelete?.orderName}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!orderToDelete) return;
+                setIsDeleting(true);
+                try {
+                  await deleteOrder(orderToDelete.id);
+                  toast({
+                    title: 'Order deleted',
+                    description: `Order "${orderToDelete.orderName}" has been deleted.`,
+                  });
+                  queryClient.invalidateQueries({ queryKey: ['orders'] });
+                  setDeleteDialogOpen(false);
+                  setOrderToDelete(null);
+                } catch (err) {
+                  const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to delete order';
+                  toast({
+                    title: 'Delete failed',
+                    description: message,
+                    variant: 'destructive',
+                  });
+                } finally {
+                  setIsDeleting(false);
+                }
+              }}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
