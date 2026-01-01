@@ -106,11 +106,13 @@ export default function OrderDetails() {
     buyerName: o.buyerName,
     status: o.status,
     comments: o.comments,
+    commission : o.commission,
     commentsHistory: (o.commentsHistory ?? []) as CommentEntry[],
     screenshots: [
     { url: o.OrderSS, name: "Order" },
     { url: o.AmazonProductSS, name: "Amazon Product" },
     { url: o.RefundSS, name: "Refund" },
+    { url: o.ReviewedSS, name: "Review" },
   ].filter((s) => Boolean(s.url)),
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,
@@ -123,7 +125,6 @@ export default function OrderDetails() {
   });
 
   const order = data ? mapOrder(data) : null;
-  console.log(order)
 
   const queryClient = useQueryClient();
 
@@ -319,6 +320,14 @@ export default function OrderDetails() {
                   <p className="text-foreground">
                     {formatDate(order.createdAt)}
                     <span className="text-muted-foreground ml-1">{formatTime(order.createdAt)}</span>
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                    <DollarSign className="w-4 h-4" /> Commission
+                  </p>
+                  <p className="text-foreground">
+                    <span className="text-muted-foreground ml-1">{!order.commission ? 0 : order.commission }</span>
                   </p>
                 </div>
               </div>
