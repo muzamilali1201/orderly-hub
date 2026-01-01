@@ -110,7 +110,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
       order.buyerName.toLowerCase().includes(search.toLowerCase()) ||
       order.createdBy.email.toLowerCase().includes(search.toLowerCase()) ||
       order.createdBy.username.toLowerCase().includes(search.toLowerCase()) ||
-      order.id.toString().includes(search);
+      order.id.toString().includes(search)
 
     const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
 
@@ -194,7 +194,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
               {/* Header Row */}
               <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-foreground">ORD# {order.orderName}</span>
+                  <span className="font-semibold text-foreground">ORD# {order.id}</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-muted-foreground">
