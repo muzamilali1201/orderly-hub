@@ -6,7 +6,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  User
+  User,
+  Bell
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -17,7 +18,7 @@ import { useState } from 'react';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Orders', href: '/orders', icon: Package },
-  { name: 'Alerts', href: '/alerts', icon: Settings },
+  { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Create Order', href: '/orders/new', icon: PlusCircle, userOnly: true },
 ];
 

@@ -96,7 +96,7 @@ const statusConfig: Record<OrderStatus, {
     icon: RefreshCcw,
   },
   'ON HOLD': {
-    label: 'Hold',
+    label: 'On Hold',
     colorClass: 'text-status-hold',
     bgClass: 'bg-status-review-awaited/15 border-status-hold/30',
     icon: AlertTriangle,

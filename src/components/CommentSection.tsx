@@ -79,43 +79,60 @@ export function CommentSection({ comments, onAddComment, isSubmitting = false }:
 
       {/* Comments List */}
       {comments.length > 0 ? (
-        <div className="space-y-4 max-h-[400px] overflow-y-auto pt-4 border-t border-border">
-          {comments.map((comment, index) => (
-            <div
-              key={comment._id || index}
+        <div
+  className="
+    space-y-4
+    max-h-[400px]
+    overflow-y-auto
+    pt-4
+    border-t
+    border-border
+
+    scrollbar-thin
+    scrollbar-thumb-muted
+    scrollbar-track-transparent
+  "
+>
+  {comments.map((comment, index) => (
+    <div
+      key={comment._id || index}
+      className={cn(
+        "p-4 rounded-lg border border-border bg-muted/30",
+        "animate-fade-in"
+      )}
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+            <User className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <div>
+            <span className="font-medium text-foreground text-sm">
+              {comment.commentedBy?.username || "Unknown"}
+            </span>
+            <span
               className={cn(
-                'p-4 rounded-lg border border-border bg-muted/30',
-                'animate-fade-in'
+                "ml-2 text-xs px-2 py-0.5 rounded-full border capitalize",
+                getRoleBadgeClass(comment.role)
               )}
-              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <span className="font-medium text-foreground text-sm">
-                      {comment.commentedBy?.username || 'Unknown'}
-                    </span>
-                    <span
-                      className={cn(
-                        'ml-2 text-xs px-2 py-0.5 rounded-full border capitalize',
-                        getRoleBadgeClass(comment.role)
-                      )}
-                    >
-                      {comment.role}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {formatDate(comment.commentedAt)}
-                </span>
-              </div>
-              <p className="text-sm text-foreground pl-10">{comment.comment}</p>
-            </div>
-          ))}
+              {comment.role}
+            </span>
+          </div>
         </div>
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
+          {formatDate(comment.commentedAt)}
+        </span>
+      </div>
+
+      <p className="text-sm text-foreground pl-10">
+        {comment.comment}
+      </p>
+    </div>
+  ))}
+</div>
+
       ) : (
         <div className="text-center py-8 text-muted-foreground">
           <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
