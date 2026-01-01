@@ -108,16 +108,33 @@ export async function getAlertHistory(params?: { page?: number; perPage?: number
   return api.get('/alert/history', { params });
 }
 
-export async function updateOrderStatus(orderId: string, status: string, refundScreenshot?: File) {
-  if (refundScreenshot) {
+export async function updateOrderStatus(
+  orderId: string, 
+  status: string, 
+  options?: { 
+    refundScreenshot?: File; 
+    reviewScreenshot?: File; 
+    commission?: string;
+  }
+) {
+  const { refundScreenshot, reviewScreenshot, commission } = options || {};
+  
+  // If any file is attached, use FormData
+  if (refundScreenshot || reviewScreenshot) {
     const form = new FormData();
     form.append('status', status);
-    form.append('RefundSS', refundScreenshot);
+    if (refundScreenshot) form.append('RefundSS', refundScreenshot);
+    if (reviewScreenshot) form.append('ReviewSS', reviewScreenshot);
+    if (commission) form.append('commission', commission);
     return api.put(`/order/${orderId}`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   }
-  return api.put(`/order/${orderId}`, { status });
+  
+  // Otherwise send JSON
+  const payload: Record<string, string> = { status };
+  if (commission) payload.commission = commission;
+  return api.put(`/order/${orderId}`, payload);
 }
 
 // Add comment to an order

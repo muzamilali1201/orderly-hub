@@ -10,7 +10,8 @@ import {
   Image,
   MessageSquare,
   Loader2,
-  Upload
+  Upload,
+  DollarSign
 } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +22,7 @@ import { StatusTimeline } from '@/components/StatusTimeline';
 import { CommentSection } from '@/components/CommentSection';
 import { OrderStatus, CommentEntry } from '@/types/order';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { FileUpload } from '@/components/FileUpload';
 import {
   Select,
@@ -70,6 +72,8 @@ export default function OrderDetails() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
   const [refundScreenshot, setRefundScreenshot] = useState<File | null>(null);
+  const [reviewScreenshot, setReviewScreenshot] = useState<File | null>(null);
+  const [commission, setCommission] = useState<string>('');
   const [isAddingComment, setIsAddingComment] = useState(false);
 
   // Lightbox state for viewing screenshots
@@ -185,15 +189,21 @@ export default function OrderDetails() {
     setShowConfirm(false);
 
     try {
-      await import('@/lib/api').then((m) => m.updateOrderStatus(order.id, pendingStatus, refundScreenshot ?? undefined));
+      await import('@/lib/api').then((m) => m.updateOrderStatus(order.id, pendingStatus, {
+        refundScreenshot: refundScreenshot ?? undefined,
+        reviewScreenshot: reviewScreenshot ?? undefined,
+        commission: commission || undefined,
+      }));
 
       toast({
         title: 'Status updated',
         description: `Order status changed to ${pendingStatus.replace('_', ' ')}`,
       });
 
-      // Reset refund screenshot
+      // Reset fields
       setRefundScreenshot(null);
+      setReviewScreenshot(null);
+      setCommission('');
 
       // Refresh both single order and orders list
       await refetch();
@@ -412,35 +422,48 @@ export default function OrderDetails() {
                   </SelectContent>
                 </Select>
 
-                {/* Refund Screenshot Upload - Admin Only */}
+                {/* Review Screenshot Upload - All Users */}
+                <div className="pt-3 border-t border-border space-y-2">
+                  <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    Review Screenshot (optional)
+                  </Label>
+                  <FileUpload
+                    files={reviewScreenshot ? [reviewScreenshot] : []}
+                    onFilesChange={(files) => setReviewScreenshot(files[0] ?? null)}
+                    maxFiles={1}
+                  />
+                </div>
+
+                {/* Refund Screenshot Upload & Commission - Admin Only */}
                 {isAdmin && (
-                  <div className="pt-3 border-t border-border space-y-2">
-                    <Label className="text-sm text-muted-foreground flex items-center gap-2">
-                      <Upload className="w-4 h-4" />
-                      Refund Screenshot (optional)
-                    </Label>
-                    <FileUpload
-                      files={refundScreenshot ? [refundScreenshot] : []}
-                      onFilesChange={(files) => setRefundScreenshot(files[0] ?? null)}
-                      maxFiles={1}
-                    />
-                    {/* {order.refundScreenshot && (
-                      <div className="mt-2">
-                        <p className="text-xs text-muted-foreground mb-1">Current Refund Screenshot:</p>
-                        <button
-                          type="button"
-                          onClick={() => { setActiveIndex(order.screenshots.length); setLightboxOpen(true); }}
-                          className="w-20 h-14 rounded border border-border overflow-hidden hover:border-primary/50 transition-colors"
-                        >
-                          <img
-                            src={order.refundScreenshot}
-                            alt="Refund Screenshot"
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      </div>
-                    )} */}
-                  </div>
+                  <>
+                    <div className="pt-3 border-t border-border space-y-2">
+                      <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                        <Upload className="w-4 h-4" />
+                        Refund Screenshot (optional)
+                      </Label>
+                      <FileUpload
+                        files={refundScreenshot ? [refundScreenshot] : []}
+                        onFilesChange={(files) => setRefundScreenshot(files[0] ?? null)}
+                        maxFiles={1}
+                      />
+                    </div>
+
+                    <div className="pt-3 border-t border-border space-y-2">
+                      <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                        <DollarSign className="w-4 h-4" />
+                        Commission (optional)
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Enter commission amount"
+                        value={commission}
+                        onChange={(e) => setCommission(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                  </>
                 )}
 
                 {isUpdating && (
