@@ -59,6 +59,7 @@ export interface Order {
   buyerName?: string;
   status: OrderStatus;
   comments?: string;
+  commission?: number;
   screenshots: string[];
   refundScreenshot?: string;
   createdBy: {
