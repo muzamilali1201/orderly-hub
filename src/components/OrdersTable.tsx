@@ -168,154 +168,154 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
         </div>
       )}
 
-      {/* Table */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-lg">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-muted/50 border-b border-border">
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Order
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Amazon #
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Buyer Name
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Buyer PayPal
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Updated
-                </th>
-                <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {paginatedOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                        <Search className="w-8 h-8 text-muted-foreground" />
-                      </div>
-                      <p className="text-muted-foreground font-medium">No orders found</p>
-                      <p className="text-sm text-muted-foreground/70">
-                        Try adjusting your search or filter criteria
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                paginatedOrders.map((order, index) => (
-                  <tr
-                    key={order.id}
-                    className={cn(
-                      'group hover:bg-accent/50 transition-colors duration-150 cursor-pointer',
-                      'animate-slide-up'
-                    )}
-                    style={{ animationDelay: `${index * 50}ms` }}
-                    // onClick={() => navigate(`/orders/${order.id}`)}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        {order.screenshots && order.screenshots.length > 0 ? (
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[1]); setPreviewOpen(true); }}
-                            className="w-12 h-12 rounded-md overflow-hidden bg-muted flex items-center justify-center hover:scale-105 transition-transform"
-                            title="View screenshot"
+      {/* Orders List */}
+      <div className="space-y-4">
+        {paginatedOrders.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-12">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <Search className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground font-medium">No orders found</p>
+              <p className="text-sm text-muted-foreground/70">
+                Try adjusting your search or filter criteria
+              </p>
+            </div>
+          </div>
+        ) : (
+          paginatedOrders.map((order, index) => (
+            <div
+              key={order.id}
+              className={cn(
+                'rounded-xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-150 animate-slide-up'
+              )}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              {/* Header Row */}
+              <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-foreground">ORD# {order.orderName}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">
+                    Submitted On: {formatDate(order.createdAt)}
+                  </span>
+                  <StatusBadge status={order.status} size="sm" />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem onClick={() => navigate(`/orders/${order.id}`)}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Details
+                      </DropdownMenuItem>
+                      {isAdmin && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOrderToDelete(order);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-destructive focus:text-destructive"
                           >
-                            <img src={order.screenshots[1]} alt={`Screenshot for ${order.orderName}`} className="w-full h-full object-cover" />
-                          </button>
-                        ) : (
-                          <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
-                            <ImageIcon className="w-5 h-5" />
-                          </div>
-                        )}
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Order
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
 
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                            {order.orderName}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            by {order.createdBy.username}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
+              {/* Content Row */}
+              <div className="flex items-start gap-4 p-4">
+                {/* Thumbnail */}
+                <div className="flex-shrink-0">
+                  {order.screenshots && order.screenshots.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[1]); setPreviewOpen(true); }}
+                      className="w-20 h-20 rounded-md overflow-hidden bg-muted flex items-center justify-center hover:scale-105 transition-transform"
+                      title="View screenshot"
+                    >
+                      <img src={order.screenshots[1]} alt={`Screenshot for ${order.orderName}`} className="w-full h-full object-cover" />
+                    </button>
+                  ) : (
+                    <div className="w-20 h-20 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
+                      <ImageIcon className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Two Column Info Grid */}
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                  {/* Left Column */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">AMZ Order #:</span>
+                      <code className="text-sm bg-muted px-2 py-0.5 rounded font-mono text-foreground">
                         {order.amazonOrderNumber}
                       </code>
-                    </td>
-                    <td className="px-6 py-4">
-                      <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
-                        {order.buyerName}
-                      </code>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {order.buyerPaypal}
-                    </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={order.status} size="sm" />
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {formatDate(order.updatedAt)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem onClick={() => navigate(`/orders/${order.id}`)}>
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
-                          {isAdmin && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOrderToDelete(order);
-                                  setDeleteDialogOpen(true);
-                                }}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete Order
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Buyer PP:</span>
+                      <span className="text-sm text-foreground">{order.buyerPaypal}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Buyer Name:</span>
+                      <span className="text-sm text-foreground">{order.buyerName}</span>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Manager:</span>
+                      <span className="text-sm text-foreground">{order.createdBy.username}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Commission:</span>
+                      <span className="text-sm text-foreground">{order.commission ?? 0}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Screenshots:</span>
+                      <div className="flex items-center gap-1">
+                        {order.screenshots && order.screenshots.length > 0 ? (
+                          order.screenshots.slice(0, 3).map((ss, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setPreviewSrc(ss); setPreviewOpen(true); }}
+                              className="w-6 h-6 rounded overflow-hidden bg-muted hover:ring-2 ring-primary transition-all"
+                              title="View screenshot"
+                            >
+                              <img src={ss} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                            </button>
+                          ))
+                        ) : (
+                          <span className="text-sm text-muted-foreground">None</span>
+                        )}
+                        {order.screenshots && order.screenshots.length > 3 && (
+                          <span className="text-xs text-muted-foreground">+{order.screenshots.length - 3}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
 
         {/* Pagination */}
         {((typeof totalPages !== 'undefined' && totalPages > 1) || (isServer && (hasMore || (currentPageProp > 1)))) && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/30">
+          <div className="flex items-center justify-between px-4 py-4 rounded-xl border border-border bg-card">
             {!isServer ? (
               <p className="text-sm text-muted-foreground">
                 Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min((currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE, filteredOrders.length)} of{' '}
@@ -343,7 +343,6 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                 <ChevronLeft className="w-4 h-4" />
               </Button>
 
-              {/* Page numbers when we know totalPages */}
               {typeof totalPages !== 'undefined' ? (
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -386,15 +385,12 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
 
         {/* Screenshot preview dialog */}
         {previewSrc && (
-          <div>
-            <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 ${previewOpen ? 'block' : 'hidden'}`} onClick={() => setPreviewOpen(false)}>
-              <div className="max-w-4xl max-h-[80vh] p-4">
-                <img src={previewSrc} alt="Screenshot preview" className="max-h-[80vh] w-auto max-w-full object-contain rounded" />
-              </div>
+          <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 ${previewOpen ? 'block' : 'hidden'}`} onClick={() => setPreviewOpen(false)}>
+            <div className="max-w-4xl max-h-[80vh] p-4">
+              <img src={previewSrc} alt="Screenshot preview" className="max-h-[80vh] w-auto max-w-full object-contain rounded" />
             </div>
           </div>
         )}
-
       </div>
 
       {/* Delete Confirmation Dialog */}
