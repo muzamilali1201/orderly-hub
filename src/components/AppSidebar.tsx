@@ -7,13 +7,16 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
-  Bell
+  Bell,
+  Menu,
+  X
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -24,27 +27,27 @@ const navigation = [
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const filteredNav = navigation.filter(item => 
     !item.userOnly || (item.userOnly && !isAdmin)
   );
 
-  return (
-    <aside
-      className={cn(
-        'flex flex-col border-r border-sidebar-border transition-all duration-300 ease-in-out',
-        collapsed ? 'w-16' : 'w-64',
-        'bg-gradient-to-b from-sidebar to-background'
-      )}
-    >
+  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
+    <>
       {/* Header */}
       <div className={cn(
         'flex items-center h-16 px-4 border-b border-sidebar-border',
-        collapsed ? 'justify-center' : 'justify-between'
+        !isMobile && collapsed ? 'justify-center' : 'justify-between'
       )}>
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-[hsl(250_70%_60%)] flex items-center justify-center">
               <Package className="w-5 h-5 text-primary-foreground" />
@@ -52,7 +55,7 @@ export function AppSidebar() {
             <span className="font-semibold text-foreground">OrderFlow</span>
           </div>
         )}
-        {collapsed && (
+        {!isMobile && collapsed && (
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-[hsl(250_70%_60%)] flex items-center justify-center">
             <Package className="w-5 h-5 text-primary-foreground" />
           </div>
@@ -72,11 +75,11 @@ export function AppSidebar() {
                 isActive
                   ? 'bg-primary/10 text-primary border border-primary/20'
                   : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                collapsed && 'justify-center px-2'
+                !isMobile && collapsed && 'justify-center px-2'
               )}
             >
-              <item.icon className={cn('shrink-0', collapsed ? 'w-5 h-5' : 'w-5 h-5')} />
-              {!collapsed && <span>{item.name}</span>}
+              <item.icon className="shrink-0 w-5 h-5" />
+              {(isMobile || !collapsed) && <span>{item.name}</span>}
             </NavLink>
           );
         })}
@@ -87,12 +90,12 @@ export function AppSidebar() {
         {/* User Info */}
         <div className={cn(
           'flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent/50',
-          collapsed && 'justify-center px-2'
+          !isMobile && collapsed && 'justify-center px-2'
         )}>
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
             <User className="w-4 h-4 text-primary" />
           </div>
-          {!collapsed && (
+          {(isMobile || !collapsed) && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">
                 {user?.username}
@@ -104,23 +107,25 @@ export function AppSidebar() {
           )}
         </div>
 
-        {/* Collapse Toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn(
-            'w-full justify-center text-muted-foreground hover:text-foreground',
-            !collapsed && 'justify-between'
-          )}
-        >
-          {!collapsed && <span className="text-xs">Collapse</span>}
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </Button>
+        {/* Collapse Toggle - Desktop only */}
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCollapsed(!collapsed)}
+            className={cn(
+              'w-full justify-center text-muted-foreground hover:text-foreground',
+              !collapsed && 'justify-between'
+            )}
+          >
+            {!collapsed && <span className="text-xs">Collapse</span>}
+            {collapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+          </Button>
+        )}
 
         {/* Logout */}
         <Button
@@ -129,13 +134,44 @@ export function AppSidebar() {
           onClick={logout}
           className={cn(
             'w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10',
-            collapsed ? 'justify-center' : 'justify-start'
+            !isMobile && collapsed ? 'justify-center' : 'justify-start'
           )}
         >
           <LogOut className="w-4 h-4" />
-          {!collapsed && <span className="ml-2">Logout</span>}
+          {(isMobile || !collapsed) && <span className="ml-2">Logout</span>}
         </Button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Menu Trigger - Fixed position */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed top-3 left-3 z-50 md:hidden bg-card/80 backdrop-blur-sm border border-border shadow-sm"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-64 p-0 bg-gradient-to-b from-sidebar to-background">
+          <SidebarContent isMobile />
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop Sidebar */}
+      <aside
+        className={cn(
+          'hidden md:flex flex-col border-r border-sidebar-border transition-all duration-300 ease-in-out',
+          collapsed ? 'w-16' : 'w-64',
+          'bg-gradient-to-b from-sidebar to-background'
+        )}
+      >
+        <SidebarContent />
+      </aside>
+    </>
   );
 }

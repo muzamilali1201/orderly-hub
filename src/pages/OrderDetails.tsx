@@ -241,93 +241,93 @@ export default function OrderDetails() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between mb-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
-              className="-ml-2"
+              className="-ml-2 md:ml-0 ml-8"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back
             </Button>
             <NotificationBell />
           </div>
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-foreground">{order.orderName}</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground break-all">{order.orderName}</h1>
             <StatusBadge status={order.status} />
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 break-all">
             Order ID: {order.id}
           </p>
         </div>
       </header>
 
-      <main className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+      <main className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
           {/* Left Column - Order Info */}
-          <div className="lg:col-span-2 space-y-6 animate-slide-up">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 animate-slide-up">
             {/* Order Information Card */}
-            <div className="rounded-xl border border-border bg-card p-6 space-y-6">
+            <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
               <div className="flex items-center gap-3 pb-4 border-b border-border">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Package className="w-5 h-5 text-primary" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Package className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Order Details</h2>
-                  <p className="text-sm text-muted-foreground">Order information and metadata</p>
+                  <h2 className="text-base sm:text-lg font-semibold text-foreground">Order Details</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Order information and metadata</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Amazon Order #</p>
-                  <code className="text-sm bg-muted px-3 py-1.5 rounded-lg font-mono inline-block">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Amazon Order #</p>
+                  <code className="text-xs sm:text-sm bg-muted px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-mono inline-block break-all">
                     {order.amazonOrderNumber}
                   </code>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <Mail className="w-4 h-4" /> Buyer PayPal
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4" /> Buyer PayPal
                   </p>
-                  <p className="text-foreground">{order.buyerPaypal}</p>
+                  <p className="text-sm sm:text-base text-foreground break-all">{order.buyerPaypal}</p>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <User className="w-4 h-4" /> Created By
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                    <User className="w-3 h-3 sm:w-4 sm:h-4" /> Created By
                   </p>
-                  <p className="text-foreground">
+                  <p className="text-sm sm:text-base text-foreground">
                     {order.createdBy.username}
-                    <span className="text-muted-foreground ml-1">({order.createdBy.email})</span>
+                    <span className="text-muted-foreground ml-1 text-xs sm:text-sm">({order.createdBy.email})</span>
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <User className="w-4 h-4" /> Buyer Name
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                    <User className="w-3 h-3 sm:w-4 sm:h-4" /> Buyer Name
                   </p>
-                  <p className="text-foreground">
+                  <p className="text-sm sm:text-base text-foreground">
                     {order.buyerName}
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" /> Created At
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4" /> Created At
                   </p>
-                  <p className="text-foreground">
+                  <p className="text-sm sm:text-base text-foreground">
                     {formatDate(order.createdAt)}
-                    <span className="text-muted-foreground ml-1">{formatTime(order.createdAt)}</span>
+                    <span className="text-muted-foreground ml-1 text-xs sm:text-sm">{formatTime(order.createdAt)}</span>
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <DollarSign className="w-4 h-4" /> Commission
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                    <DollarSign className="w-3 h-3 sm:w-4 sm:h-4" /> Commission
                   </p>
-                  <p className="text-foreground">
-                    <span className="text-muted-foreground ml-1">{!order.commission ? 0 : order.commission }</span>
+                  <p className="text-sm sm:text-base text-foreground">
+                    <span className="text-muted-foreground">{!order.commission ? 0 : order.commission}</span>
                   </p>
                 </div>
               </div>
