@@ -133,11 +133,11 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
     <div className="space-y-4 animate-fade-in">
       {/* Filters */}
       {showFilters && (
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search orders, Amazon #, PayPal, email..."
+              placeholder="Search orders..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -169,15 +169,15 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
       )}
 
       {/* Orders List */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {paginatedOrders.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-12">
+          <div className="rounded-xl border border-border bg-card p-8 sm:p-12">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                <Search className="w-8 h-8 text-muted-foreground" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center">
+                <Search className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground font-medium">No orders found</p>
-              <p className="text-sm text-muted-foreground/70">
+              <p className="text-sm text-muted-foreground/70 text-center">
                 Try adjusting your search or filter criteria
               </p>
             </div>
@@ -192,13 +192,13 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
               style={{ animationDelay: `${index * 50}ms` }}
             >
               {/* Header Row */}
-              <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-4 py-2 sm:py-3 bg-muted/30 border-b border-border gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-foreground">ORD# {order.id}</span>
+                  <span className="font-semibold text-foreground text-sm sm:text-base">ORD# {order.id}</span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground">
-                    Submitted On: {formatDate(order.createdAt)}
+                <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
+                    {formatDate(order.createdAt)}
                   </span>
                   <StatusBadge status={order.status} size="sm" />
                   <DropdownMenu>
@@ -234,57 +234,57 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
               </div>
 
               {/* Content Row */}
-              <div className="flex items-start gap-4 p-4">
+              <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-3 sm:p-4">
                 {/* Thumbnail */}
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 self-center sm:self-start">
                   {order.screenshots && order.screenshots.length > 0 ? (
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[1]); setPreviewOpen(true); }}
-                      className="w-20 h-20 rounded-md overflow-hidden bg-muted flex items-center justify-center hover:scale-105 transition-transform"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden bg-muted flex items-center justify-center hover:scale-105 transition-transform"
                       title="View screenshot"
                     >
                       <img src={order.screenshots[1]} alt={`Screenshot for ${order.orderName}`} className="w-full h-full object-cover" />
                     </button>
                   ) : (
-                    <div className="w-20 h-20 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
-                      <ImageIcon className="w-8 h-8" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
+                      <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
                   )}
                 </div>
 
                 {/* Two Column Info Grid */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-1 sm:gap-y-2">
                   {/* Left Column */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">AMZ Order #:</span>
-                      <code className="text-sm bg-muted px-2 py-0.5 rounded font-mono text-foreground">
+                  <div className="space-y-1 sm:space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs sm:text-sm text-muted-foreground">AMZ Order #:</span>
+                      <code className="text-xs sm:text-sm bg-muted px-1.5 sm:px-2 py-0.5 rounded font-mono text-foreground break-all">
                         {order.amazonOrderNumber}
                       </code>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Buyer PP:</span>
-                      <span className="text-sm text-foreground">{order.buyerPaypal}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Buyer PP:</span>
+                      <span className="text-xs sm:text-sm text-foreground break-all">{order.buyerPaypal}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Buyer Name:</span>
-                      <span className="text-sm text-foreground">{order.buyerName}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Buyer Name:</span>
+                      <span className="text-xs sm:text-sm text-foreground">{order.buyerName}</span>
                     </div>
                   </div>
 
                   {/* Right Column */}
-                  <div className="space-y-2">
+                  <div className="space-y-1 sm:space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Manager:</span>
-                      <span className="text-sm text-foreground">{order.createdBy.username}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">Manager:</span>
+                      <span className="text-xs sm:text-sm text-foreground">{order.createdBy.username}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Commission:</span>
-                      <span className="text-sm text-foreground">{order.commission ?? 0}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">Commission:</span>
+                      <span className="text-xs sm:text-sm text-foreground">{order.commission ?? 0}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Screenshots:</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Screenshots:</span>
                       <div className="flex items-center gap-1">
                         {order.screenshots && order.screenshots.length > 0 ? (
                           order.screenshots.slice(0, 3).map((ss, idx) => (
@@ -292,14 +292,14 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                               key={idx}
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setPreviewSrc(ss); setPreviewOpen(true); }}
-                              className="w-6 h-6 rounded overflow-hidden bg-muted hover:ring-2 ring-primary transition-all"
+                              className="w-5 h-5 sm:w-6 sm:h-6 rounded overflow-hidden bg-muted hover:ring-2 ring-primary transition-all"
                               title="View screenshot"
                             >
                               <img src={ss} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
                             </button>
                           ))
                         ) : (
-                          <span className="text-sm text-muted-foreground">None</span>
+                          <span className="text-xs sm:text-sm text-muted-foreground">None</span>
                         )}
                         {order.screenshots && order.screenshots.length > 3 && (
                           <span className="text-xs text-muted-foreground">+{order.screenshots.length - 3}</span>
@@ -312,22 +312,21 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
             </div>
           ))
         )}
-
         {/* Pagination */}
         {((typeof totalPages !== 'undefined' && totalPages > 1) || (isServer && (hasMore || (currentPageProp > 1)))) && (
-          <div className="flex items-center justify-between px-4 py-4 rounded-xl border border-border bg-card">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 sm:px-4 py-3 sm:py-4 rounded-xl border border-border bg-card">
             {!isServer ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                 Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min((currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE, filteredOrders.length)} of{' '}
                 {filteredOrders.length} orders
               </p>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Page {currentPageProp}{typeof totalPages !== 'undefined' ? ` of ${totalPages}` : ''}
               </p>
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
               <Button
                 variant="outline"
                 size="sm"
@@ -345,7 +344,13 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
 
               {typeof totalPages !== 'undefined' ? (
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    const pageNum = totalPages <= 5 ? i + 1 : 
+                      (isServer ? currentPageProp : currentPage) <= 3 ? i + 1 :
+                      (isServer ? currentPageProp : currentPage) >= totalPages - 2 ? totalPages - 4 + i :
+                      (isServer ? currentPageProp : currentPage) - 2 + i;
+                    return pageNum;
+                  }).map((page) => (
                     <Button
                       key={page}
                       variant={(isServer ? currentPageProp : currentPage) === page ? 'default' : 'ghost'}
@@ -357,7 +362,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                           setCurrentPage(page);
                         }
                       }}
-                      className="w-8 h-8 p-0"
+                      className="w-7 h-7 sm:w-8 sm:h-8 p-0 text-xs sm:text-sm"
                     >
                       {page}
                     </Button>
@@ -385,14 +390,13 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
 
         {/* Screenshot preview dialog */}
         {previewSrc && (
-          <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 ${previewOpen ? 'block' : 'hidden'}`} onClick={() => setPreviewOpen(false)}>
-            <div className="max-w-4xl max-h-[80vh] p-4">
-              <img src={previewSrc} alt="Screenshot preview" className="max-h-[80vh] w-auto max-w-full object-contain rounded" />
+          <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 ${previewOpen ? 'block' : 'hidden'}`} onClick={() => setPreviewOpen(false)}>
+            <div className="max-w-4xl max-h-[90vh]">
+              <img src={previewSrc} alt="Screenshot preview" className="max-h-[85vh] w-auto max-w-full object-contain rounded" />
             </div>
           </div>
         )}
       </div>
-
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

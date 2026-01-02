@@ -100,22 +100,22 @@ export default function CreateOrder() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(-1)}
-                className="-ml-2"
+                className="-ml-2 md:ml-0 ml-8"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
-                Back
+                <span className="hidden sm:inline">Back</span>
               </Button>
 
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Create New Order</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
+                <h1 className="text-lg sm:text-2xl font-bold text-foreground">Create New Order</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 hidden sm:block">
                   Fill in the order details below
                 </p>
               </div>
@@ -125,23 +125,23 @@ export default function CreateOrder() {
         </div>
       </header>
 
-      <main className="p-6 max-w-4xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-8 animate-slide-up">
+      <main className="p-4 sm:p-6 max-w-4xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 animate-slide-up">
           {/* Order Information */}
-          <div className="rounded-xl border border-border bg-card p-6 space-y-6">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="flex items-center gap-3 pb-4 border-b border-border">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Package className="w-5 h-5 text-primary" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">Order Information</h2>
-                <p className="text-sm text-muted-foreground">Basic order details</p>
+                <h2 className="text-base sm:text-lg font-semibold text-foreground">Order Information</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">Basic order details</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
-                <Label htmlFor="orderName">
+                <Label htmlFor="orderName" className="text-sm">
                   Product Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -155,7 +155,7 @@ export default function CreateOrder() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="amazonOrderNumber">
+                <Label htmlFor="amazonOrderNumber" className="text-sm">
                   Amazon Order Number <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -169,7 +169,7 @@ export default function CreateOrder() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="buyerPaypal">
+                <Label htmlFor="buyerPaypal" className="text-sm">
                   Buyer PayPal <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -184,7 +184,7 @@ export default function CreateOrder() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="buyerName">Buyer Name</Label>
+                <Label htmlFor="buyerName" className="text-sm">Buyer Name</Label>
                 <Input
                   id="buyerName"
                   name="buyerName"
@@ -194,8 +194,8 @@ export default function CreateOrder() {
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="comments">Comments (Optional)</Label>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="comments" className="text-sm">Comments (Optional)</Label>
                 <Textarea
                   id="comments"
                   name="comments"
@@ -210,9 +210,9 @@ export default function CreateOrder() {
           </div>
 
           {/* Screenshots */}
-          <div className="rounded-xl border border-border bg-card p-6 space-y-6">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="flex items-center gap-3 pb-4 border-b border-border">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -221,7 +221,7 @@ export default function CreateOrder() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5 text-primary"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-primary"
                 >
                   <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                   <circle cx="9" cy="9" r="2" />
@@ -229,16 +229,16 @@ export default function CreateOrder() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">Screenshots</h2>
-                <p className="text-sm text-muted-foreground">
-                  Upload the required Order screenshot and an optional Amazon product screenshot
+                <h2 className="text-base sm:text-lg font-semibold text-foreground">Screenshots</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Upload order & product screenshots
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="orderSS">Order Screenshot <span className="text-destructive">*</span></Label>
+                <Label htmlFor="orderSS" className="text-sm">Order Screenshot <span className="text-destructive">*</span></Label>
                 <FileUpload
                   files={orderScreenshot ? [orderScreenshot] : []}
                   onFilesChange={(files) => setOrderScreenshot(files[0] ?? null)}
@@ -247,7 +247,7 @@ export default function CreateOrder() {
               </div>
 
               <div>
-                <Label htmlFor="productSS">Amazon Product Screenshot (optional)</Label>
+                <Label htmlFor="productSS" className="text-sm">Amazon Product Screenshot (optional)</Label>
                 <FileUpload
                   files={productScreenshot ? [productScreenshot] : []}
                   onFilesChange={(files) => setProductScreenshot(files[0] ?? null)}

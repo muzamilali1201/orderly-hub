@@ -76,46 +76,45 @@ export default function Alerts() {
   return (
     <div className="min-h-screen">
       <header className="border-b border-border bg-card/50 sticky top-0 z-10">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3 pl-10 md:pl-0">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Alerts</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">Recent status changes across orders</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Alerts</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Recent status changes</p>
             </div>
             <span className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${isConnected ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground'}`}>
               {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
               {isConnected ? 'Live' : 'Offline'}
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-28">
-              <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={`${perPage}/page`} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 / page</SelectItem>
-                  <SelectItem value="10">10 / page</SelectItem>
-                  <SelectItem value="25">25 / page</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
+              <SelectTrigger className="w-24 sm:w-28">
+                <SelectValue placeholder={`${perPage}/page`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 / page</SelectItem>
+                <SelectItem value="10">10 / page</SelectItem>
+                <SelectItem value="25">25 / page</SelectItem>
+              </SelectContent>
+            </Select>
             <NotificationBell />
           </div>
         </div>
       </header>
 
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-muted/50 border-b border-border">
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">From</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">To</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Changed By</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">When</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">From</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">To</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Changed By</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">When</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -124,16 +123,13 @@ export default function Alerts() {
                 ) : (
                   entries.map((e) => (
                     <tr key={e.id} className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => e.orderId && navigate(`/orders/${e.orderId}`)}>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
-                          {/* <code className="text-sm bg-muted px-2 py-1 rounded font-mono">{e.orderId ?? ''}</code> */}
-                        </div>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
+                        <span className="font-medium text-foreground text-sm">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
                       </td>
-                      <td className="px-6 py-4"><StatusBadge status={(e.fromStatus ?? e.previousStatus ?? 'ORDERED') as any} size="sm" /></td>
-                      <td className="px-6 py-4"><StatusBadge status={(e.toStatus ?? e.newStatus ?? 'ORDERED') as any} size="sm" /></td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">{e.changedBy.username} <span className="text-xs text-muted-foreground/70">({e.changedBy.role})</span></td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">{formatDateTime(e.changedAt)}</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4"><StatusBadge status={(e.fromStatus ?? e.previousStatus ?? 'ORDERED') as any} size="sm" /></td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4"><StatusBadge status={(e.toStatus ?? e.newStatus ?? 'ORDERED') as any} size="sm" /></td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{e.changedBy.username} <span className="text-xs text-muted-foreground/70">({e.changedBy.role})</span></td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{formatDateTime(e.changedAt)}</td>
                     </tr>
                   ))
                 )}
@@ -141,16 +137,46 @@ export default function Alerts() {
             </table>
           </div>
 
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y divide-border">
+            {entries.length === 0 ? (
+              <div className="px-4 py-12 text-center text-muted-foreground">
+                {isLoading ? 'Loading...' : 'No alerts found'}
+              </div>
+            ) : (
+              entries.map((e) => (
+                <div
+                  key={e.id}
+                  className="p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => e.orderId && navigate(`/orders/${e.orderId}`)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-foreground text-sm">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
+                    <span className="text-xs text-muted-foreground">{formatDateTime(e.changedAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <StatusBadge status={(e.fromStatus ?? e.previousStatus ?? 'ORDERED') as any} size="sm" />
+                    <span className="text-muted-foreground">→</span>
+                    <StatusBadge status={(e.toStatus ?? e.newStatus ?? 'ORDERED') as any} size="sm" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Changed by {e.changedBy.username} ({e.changedBy.role})
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+
           {/* Pagination */}
           {(typeof totalPages !== 'undefined' ? totalPages > 1 : entries.length > 0) && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/30">
-              <p className="text-sm text-muted-foreground">Page {page}{totalPages ? ` of ${totalPages}` : ''}</p>
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-muted/30">
+              <p className="text-xs sm:text-sm text-muted-foreground">Page {page}{totalPages ? ` of ${totalPages}` : ''}</p>
+              <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
                 <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                {totalPages ? Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <Button key={p} variant={p === page ? 'default' : 'ghost'} size="sm" onClick={() => setPage(p)} className="w-8 h-8 p-0">{p}</Button>
+                {totalPages ? Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
+                  <Button key={p} variant={p === page ? 'default' : 'ghost'} size="sm" onClick={() => setPage(p)} className="w-7 h-7 sm:w-8 sm:h-8 p-0 text-xs sm:text-sm">{p}</Button>
                 )) : null}
                 <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={typeof totalPages !== 'undefined' && page === totalPages}>
                   <ChevronRight className="w-4 h-4" />

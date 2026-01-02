@@ -165,9 +165,9 @@ export default function Dashboard() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <div className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="pl-10 md:pl-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Dashboard</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Welcome back, {user?.username}
             </p>
@@ -175,18 +175,18 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <NotificationBell />
             {!isAdmin && (
-              <Button variant="hero" onClick={() => navigate('/orders/new')}>
+              <Button variant="hero" size="sm" className="sm:size-default" onClick={() => navigate('/orders/new')}>
                 <PlusCircle className="w-4 h-4" />
-                New Order
+                <span className="hidden sm:inline">New Order</span>
               </Button>
             )}
           </div>
         </div>
       </header>
 
-      <main className="p-6 space-y-8">
+      <main className="p-4 sm:p-6 space-y-6 sm:space-y-8">
         {/* Stats Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {/* Always show total */}
           <StatsCard
             title="Total Orders"
@@ -252,7 +252,7 @@ export default function Dashboard() {
         {/* Recent Orders */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Orders</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-foreground">Recent Orders</h2>
             <Button variant="ghost" size="sm" onClick={() => navigate('/orders')}>
               View All
               <TrendingUp className="w-4 h-4 ml-1" />

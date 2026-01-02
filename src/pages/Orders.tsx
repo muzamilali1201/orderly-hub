@@ -101,37 +101,35 @@ export default function Orders() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Orders</h1>
+        <div className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="pl-10 md:pl-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Orders</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               {isAdmin ? 'Manage all orders' : 'View all orders'}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <NotificationBell />
-            <div className="hidden sm:block">
-              <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
-                <SelectTrigger className="w-28 h-9">
-                  <SelectValue placeholder={`${perPage} per page`} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2 / page</SelectItem>
-                  <SelectItem value="5">5 / page</SelectItem>
-                  <SelectItem value="10">10 / page</SelectItem>
-                  <SelectItem value="25">25 / page</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button variant="hero" onClick={() => navigate('/orders/new')}>
+            <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
+              <SelectTrigger className="w-24 sm:w-28 h-9">
+                <SelectValue placeholder={`${perPage} per page`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2 / page</SelectItem>
+                <SelectItem value="5">5 / page</SelectItem>
+                <SelectItem value="10">10 / page</SelectItem>
+                <SelectItem value="25">25 / page</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="hero" size="sm" onClick={() => navigate('/orders/new')}>
               <PlusCircle className="w-4 h-4" />
-              New Order
+              <span className="hidden sm:inline">New Order</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         {isLoading ? (
           <div className="flex items-center justify-center p-8">
             <svg className="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
