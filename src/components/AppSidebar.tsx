@@ -22,7 +22,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Orders', href: '/orders', icon: Package },
   { name: 'Alerts', href: '/alerts', icon: Bell },
-  { name: 'Create Order', href: '/orders/new', icon: PlusCircle, userOnly: true },
+  { name: 'Create Order', href: '/orders/new', icon: PlusCircle },
 ];
 
 export function AppSidebar() {
