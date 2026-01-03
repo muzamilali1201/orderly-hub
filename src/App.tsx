@@ -14,6 +14,7 @@ import Orders from "./pages/Orders";
 import CreateOrder from "./pages/CreateOrder";
 import OrderDetails from "./pages/OrderDetails";
 import Alerts from "./pages/Alerts";
+import Sheets from "./pages/Sheets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/sheets" element={<Sheets />} />
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/orders/new" element={<CreateOrder />} />
                 <Route path="/orders/:id" element={<OrderDetails />} />
