@@ -9,7 +9,15 @@ import { FileUpload } from '@/components/FileUpload';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getSheets, Sheet } from '@/lib/api';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function CreateOrder() {
   const navigate = useNavigate();
@@ -18,6 +26,7 @@ export default function CreateOrder() {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedSheet, setSelectedSheet] = useState<string>('');
   const [formData, setFormData] = useState({
     orderName: '',
     amazonOrderNumber: '',
@@ -27,6 +36,15 @@ export default function CreateOrder() {
   });
   const [orderScreenshot, setOrderScreenshot] = useState<File | null>(null);
   const [productScreenshot, setProductScreenshot] = useState<File | null>(null);
+
+  // Fetch sheets for dropdown
+  const { data: sheetsData } = useQuery({
+    queryKey: ['sheets'],
+    queryFn: async () => {
+      const res = await getSheets();
+      return res.data.data;
+    },
+  });
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,6 +70,7 @@ export default function CreateOrder() {
       form.append('buyerPaypal', formData.buyerPaypal);
       if (formData.buyerName) form.append('buyerName', formData.buyerName);
       if (formData.comments) form.append('comments', formData.comments);
+      if (selectedSheet) form.append('sheetName', selectedSheet);
 
       // Attach screenshots
       form.append('OrderSS', orderScreenshot);
@@ -152,6 +171,22 @@ export default function CreateOrder() {
                   onChange={handleChange}
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sheet" className="text-sm">Sheet (Optional)</Label>
+                <Select value={selectedSheet} onValueChange={setSelectedSheet}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a sheet..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sheetsData?.map((sheet: Sheet) => (
+                      <SelectItem key={sheet._id} value={sheet.name}>
+                        {sheet.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

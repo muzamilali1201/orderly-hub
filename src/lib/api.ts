@@ -147,4 +147,29 @@ export async function deleteOrder(orderId: string) {
   return api.delete(`/order/${orderId}`);
 }
 
+// --- Sheet endpoints ---
+export interface Sheet {
+  _id: string;
+  name: string;
+  createdBy: {
+    _id: string;
+    email: string;
+    username: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getSheets() {
+  return api.get<{ success: boolean; message: string; data: Sheet[] }>('/sheet');
+}
+
+export async function createSheet(name: string) {
+  return api.post('/sheet', { name });
+}
+
+export async function deleteSheet(sheetId: string) {
+  return api.delete(`/sheet/${sheetId}`);
+}
+
 export default api;

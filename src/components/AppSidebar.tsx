@@ -2,14 +2,13 @@ import {
   LayoutDashboard, 
   Package, 
   PlusCircle, 
-  Settings, 
   LogOut,
   ChevronLeft,
   ChevronRight,
   User,
   Bell,
   Menu,
-  X
+  FileSpreadsheet
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -22,6 +21,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Orders', href: '/orders', icon: Package },
+  { name: 'Sheets', href: '/sheets', icon: FileSpreadsheet },
   { name: 'Alerts', href: '/alerts', icon: Bell, showBadge: true },
   { name: 'Create Order', href: '/orders/new', icon: PlusCircle },
 ];
