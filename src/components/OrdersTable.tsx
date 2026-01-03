@@ -270,7 +270,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                           </DropdownMenuSubContent>
                         </DropdownMenuPortal>
                       </DropdownMenuSub>
-                      {isAdmin && (
+                      {
                         <>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -285,7 +285,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                             Delete Order
                           </DropdownMenuItem>
                         </>
-                      )}
+                      }
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
