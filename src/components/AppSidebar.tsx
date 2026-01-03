@@ -14,6 +14,7 @@ import {
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -21,7 +22,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Orders', href: '/orders', icon: Package },
-  { name: 'Alerts', href: '/alerts', icon: Bell },
+  { name: 'Alerts', href: '/alerts', icon: Bell, showBadge: true },
   { name: 'Create Order', href: '/orders/new', icon: PlusCircle },
 ];
 
@@ -29,16 +30,13 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout, isAdmin } = useAuth();
+  const { unreadCount } = useNotifications();
   const location = useLocation();
 
   // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
-
-  const filteredNav = navigation.filter(item => 
-    !item.userOnly || (item.userOnly && !isAdmin)
-  );
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>
@@ -64,21 +62,28 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {filteredNav.map((item) => {
+        {navigation.map((item) => {
           const isActive = location.pathname === item.href;
           return (
             <NavLink
               key={item.name}
               to={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative',
                 isActive
                   ? 'bg-primary/10 text-primary border border-primary/20'
                   : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 !isMobile && collapsed && 'justify-center px-2'
               )}
             >
-              <item.icon className="shrink-0 w-5 h-5" />
+              <div className="relative shrink-0">
+                <item.icon className="w-5 h-5" />
+                {item.showBadge && unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold rounded-full bg-green-500 text-white px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </div>
               {(isMobile || !collapsed) && <span>{item.name}</span>}
             </NavLink>
           );

@@ -11,7 +11,8 @@ import {
   MoreHorizontal,
   Image as ImageIcon,
   Trash2,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { Order, OrderStatus } from '@/types/order';
 import { StatusBadge } from './StatusBadge';
@@ -30,6 +31,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
@@ -42,7 +47,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
-import { deleteOrder } from '@/lib/api';
+import { deleteOrder, updateOrderStatus } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -67,20 +72,22 @@ interface OrdersTableProps {
 
 const PAKISTAN_TZ = 'Asia/Karachi';
 
-const statuses: (OrderStatus | 'ALL')[] = [
-        "ORDERED",
-        "REVIEWED",
-        "SEND_TO_SELLER",
-        "ON HOLD",
-        "REVIEW_AWAITED",
-        "REFUND_DELAYED",
-        "REFUNDED",
-        "CORRECTED",
-        "CANCELLED",
-        "COMMISSION_COLLECTED",
-        "PAID",
-        "SENT"
-      ];
+const ALL_STATUSES: OrderStatus[] = [
+  "ORDERED",
+  "REVIEWED",
+  "SEND_TO_SELLER",
+  "ON HOLD",
+  "REVIEW_AWAITED",
+  "REFUND_DELAYED",
+  "REFUNDED",
+  "CORRECTED",
+  "CANCELLED",
+  "COMMISSION_COLLECTED",
+  "PAID",
+  "SENT"
+];
+
+const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
 
 const ITEMS_PER_PAGE = 10;
 
@@ -100,6 +107,9 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Status change state
+  const [changingStatusOrderId, setChangingStatusOrderId] = useState<string | null>(null);
 
   // Filter orders (client-side filtering still applies to the current page of orders)
   const filteredOrders = orders.filter((order) => {
@@ -127,6 +137,28 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
 
   const formatDate = (dateString: string) => {
     return formatInTimeZone(new Date(dateString), PAKISTAN_TZ, 'd MMM, yyyy h:mm a');
+  };
+
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    setChangingStatusOrderId(orderId);
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      toast({
+        title: 'Status updated',
+        description: `Order status changed to ${newStatus.replace('_', ' ')}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['overall-orders'] });
+    } catch (err) {
+      const message = (err as any)?.response?.data?.message || (err as Error).message || 'Failed to update status';
+      toast({
+        title: 'Update failed',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setChangingStatusOrderId(null);
+    }
   };
 
   return (
@@ -207,11 +239,37 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem onClick={() => navigate(`/orders/${order.id}`)}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Details
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger disabled={changingStatusOrderId === order.id}>
+                          {changingStatusOrderId === order.id ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                          )}
+                          Change Status
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent className="max-h-64 overflow-y-auto">
+                            {ALL_STATUSES.filter(s => s !== order.status).map((status) => (
+                              <DropdownMenuItem
+                                key={status}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStatusChange(order.id, status);
+                                }}
+                              >
+                                {status.replace('_', ' ')}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
                       {isAdmin && (
                         <>
                           <DropdownMenuSeparator />
