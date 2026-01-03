@@ -135,8 +135,9 @@ export default function Dashboard() {
     buyerPaypal: o.buyerPaypal ?? '',
     buyerName : o.buyerName ?? '',
     status: o.status,
-    comments: o.comments,
+    comments: o.commentsHistory,
     commission : o.commission,
+    sheetName : o.sheet?.name,
     screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,

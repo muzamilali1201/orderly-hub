@@ -81,6 +81,7 @@ export default function Orders() {
     status: o.status,
     comments: o.comments,
     commission : o.commission,
+    sheetName : o.sheet?.name,
     screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,

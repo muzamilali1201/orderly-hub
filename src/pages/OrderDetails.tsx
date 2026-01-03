@@ -11,7 +11,8 @@ import {
   MessageSquare,
   Loader2,
   Upload,
-  DollarSign
+  DollarSign,
+  Book
 } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,6 +107,7 @@ export default function OrderDetails() {
     buyerName: o.buyerName,
     status: o.status,
     comments: o.comments,
+    sheetName : o.sheet?.name,
     commission : o.commission,
     commentsHistory: (o.commentsHistory ?? []) as CommentEntry[],
     screenshots: [
@@ -320,6 +322,14 @@ export default function OrderDetails() {
                   <p className="text-sm sm:text-base text-foreground">
                     {formatDate(order.createdAt)}
                     <span className="text-muted-foreground ml-1 text-xs sm:text-sm">{formatTime(order.createdAt)}</span>
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
+                    <Book className="w-3 h-3 sm:w-4 sm:h-4" /> Sheet Name
+                  </p>
+                  <p className="text-sm sm:text-base text-foreground">
+                    <span className="text-muted-foreground ml-1 text-xs sm:text-sm">{order.sheetName}</span>
                   </p>
                 </div>
                 <div className="space-y-1">

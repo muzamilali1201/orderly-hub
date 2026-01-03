@@ -58,9 +58,10 @@ export interface Order {
   buyerPaypal: string;
   buyerName?: string;
   status: OrderStatus;
-  comments?: string;
+  comments?: CommentEntry[];
   commission?: number;
   screenshots: string[];
+  sheetName : string;
   refundScreenshot?: string;
   createdBy: {
     id: string;

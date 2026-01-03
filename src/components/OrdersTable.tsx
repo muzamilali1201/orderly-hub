@@ -120,6 +120,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
       order.buyerName.toLowerCase().includes(search.toLowerCase()) ||
       order.createdBy.email.toLowerCase().includes(search.toLowerCase()) ||
       order.createdBy.username.toLowerCase().includes(search.toLowerCase()) ||
+      order.sheetName.toLowerCase().includes(search.toLowerCase()) ||
       order.id.toString().includes(search)
 
     const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
@@ -329,6 +330,12 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
                       <span className="text-xs sm:text-sm text-muted-foreground">Buyer Name:</span>
                       <span className="text-xs sm:text-sm text-foreground">{order.buyerName}</span>
                     </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Sheet Name:</span>
+                      <span className="text-xs sm:text-sm text-foreground">{order.sheetName}</span>
+                    </div>
+                    
+                    
                   </div>
 
                   {/* Right Column */}
