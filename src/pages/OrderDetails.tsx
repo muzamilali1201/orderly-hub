@@ -52,7 +52,7 @@ const adminStatuses: OrderStatus[] = [
         "ORDERED",
         "REVIEWED",
         "SEND_TO_SELLER",
-        "ON HOLD",
+        "HOLD",
         "REVIEW_AWAITED",
         "REFUND_DELAYED",
         "REFUNDED",

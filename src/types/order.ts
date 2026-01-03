@@ -10,7 +10,7 @@ export type OrderStatus =
   | 'REVIEW_DELAYED'
   | 'REFUND_DELAYED'
   | 'SEND_TO_SELLER'
-  |      'ON HOLD'
+  |      'HOLD'
   |      'SENT'
 
 export type UserRole = 'admin' | 'user';

@@ -68,6 +68,9 @@ export default {
           refunded: "hsl(var(--status-refunded))",
           paid: "hsl(var(--status-paid))",
           cancelled: "hsl(var(--status-cancelled))",
+          "refund-delayed": "hsl(var(--status-refund-delayed))",
+          "send-to-seller" : "hsl(var(--status-send-to-seller))",
+          "on-hold": "hsl(var(--status-on-hold))",
         },
       },
       borderRadius: {

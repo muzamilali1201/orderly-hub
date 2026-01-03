@@ -110,16 +110,16 @@ export default function Dashboard() {
   }
 
   const STATUS_META: Record<string, { icon: any; color: string }> = {
-    ORDERED: { icon: Package, color: 'text-status-ordered' },
-    REVIEWED: { icon: CheckCircle, color: 'text-status-reviewed' },
-    CORRECTED: { icon: CheckCircle, color: 'text-status-corrected' },
-    PAID: { icon: DollarSign, color: 'text-status-paid' },
-    REFUNDED: { icon: DollarSign, color: 'text-status-refunded' },
-    REVIEW_AWAITED: { icon: Clock, color: 'text-status-review-awaited' },
-    REFUND_DELAYED: { icon: AlertTriangle, color: 'text-status-refunded' },
-    REVIEW_DELAYED: { icon: AlertTriangle, color: 'text-status-review-awaited' },
-    COMISSION_COLLECTED: { icon: Coins, color: 'text-status-paid' },
-    CANCELLED: { icon: XCircle, color: 'text-status-cancelled' },
+    ORDERED: { icon: Package, color: 'text-status-white' },
+    REVIEWED: { icon: CheckCircle, color: 'text-status-white' },
+    CORRECTED: { icon: CheckCircle, color: 'text-status-white' },
+    PAID: { icon: DollarSign, color: 'text-status-white' },
+    REFUNDED: { icon: DollarSign, color: 'text-status-white' },
+    REVIEW_AWAITED: { icon: Clock, color: 'text-status-review-white' },
+    REFUND_DELAYED: { icon: AlertTriangle, color: 'text-status-white' },
+    REVIEW_DELAYED: { icon: AlertTriangle, color: 'text-status-white' },
+    COMISSION_COLLECTED: { icon: Coins, color: 'text-status-white' },
+    CANCELLED: { icon: XCircle, color: 'text-status-white' },
   };
 
   // Build readable subtitles that include the original status names (humanized)
