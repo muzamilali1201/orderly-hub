@@ -133,6 +133,7 @@ export default function Alerts() {
                     <tr key={e.id} className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => e.orderId && navigate(`/orders/${e.orderId}`)}>
                       <td className="px-4 sm:px-6 py-3 sm:py-4">
                         <span className="font-medium text-foreground text-sm">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
+                        <p className="font-normal text-foreground text-xs">{ e.amazonOrderNo ?? ''}</p>
                       </td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4">
                         {e.isNewOrder ? (

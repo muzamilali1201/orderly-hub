@@ -298,7 +298,7 @@ export default function CreateOrder() {
               </div>
 
               <div>
-                <Label htmlFor="productSS" className="text-sm">Amazon Product Screenshot (optional)</Label>
+                <Label htmlFor="productSS" className="text-sm">Amazon Product Screenshot</Label>
                 <FileUpload
                   files={productScreenshot ? [productScreenshot] : []}
                   onFilesChange={(files) => setProductScreenshot(files[0] ?? null)}

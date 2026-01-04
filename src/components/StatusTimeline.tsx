@@ -35,6 +35,7 @@ export function StatusTimeline({ history }: StatusTimelineProps) {
 
         <div className="space-y-6">
           {sortedHistory.map((entry, index) => {
+
             const StatusIcon = statusConfig[entry.newStatus].icon;
             const isFirst = index === 0;
 

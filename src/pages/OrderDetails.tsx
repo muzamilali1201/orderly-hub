@@ -51,8 +51,8 @@ const PAKISTAN_TZ = 'Asia/Karachi';
 const adminStatuses: OrderStatus[] = [
   "ORDERED",
   "REVIEWED",
-  "SEND_TO_SELLER",
-  "HOLD",
+  "SENT_TO SELLER",
+  "ON HOLD",
   "REVIEW_AWAITED",
   "REFUND_DELAYED",
   "REFUNDED",
@@ -189,7 +189,7 @@ export default function OrderDetails() {
   };
 
   const handleUpdateClick = () => {
-    if (!selectedStatus || selectedStatus === order.status) return;
+    // if (!selectedStatus || selectedStatus === order.status) return;
     setPendingStatus(selectedStatus);
     setShowConfirm(true);
   };
@@ -209,7 +209,7 @@ export default function OrderDetails() {
 
       toast({
         title: 'Status updated',
-        description: `Order status changed to ${pendingStatus.replace('_', ' ')}`,
+        description: `Order updated successfully.}`,
       });
 
       // Reset fields
@@ -303,7 +303,9 @@ export default function OrderDetails() {
                   <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
                     <Mail className="w-3 h-3 sm:w-4 sm:h-4" /> Buyer PayPal
                   </p>
-                  <p className="text-sm sm:text-base text-foreground break-all">{order.buyerPaypal}</p>
+                  <code className="text-xs sm:text-sm bg-muted px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-mono inline-block break-all">
+                    {order.buyerPaypal}
+                  </code>
                 </div>
 
                 <div className="space-y-1">
@@ -496,7 +498,7 @@ export default function OrderDetails() {
                 {/* Update Button */}
                 <Button
                   onClick={handleUpdateClick}
-                  disabled={isUpdating || !selectedStatus || selectedStatus === order.status}
+                  disabled={isUpdating}
                   className="w-full"
                 >
                   {isUpdating ? (
@@ -563,9 +565,9 @@ export default function OrderDetails() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Status Change</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to change the order status from{' '}
-              <span className="font-medium text-foreground">{order.status.replace('_', ' ')}</span> to{' '}
-              <span className="font-medium text-foreground">{pendingStatus?.replace('_', ' ')}</span>?
+              Are you sure you want to update the order?
+              {/* <span className="font-medium text-foreground">{order.status.replace('_', ' ')}</span> to{' '}
+              <span className="font-medium text-foreground">{pendingStatus?.replace('_', ' ')}</span>? */}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
