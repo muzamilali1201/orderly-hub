@@ -72,22 +72,39 @@ interface OrdersTableProps {
 
 const PAKISTAN_TZ = 'Asia/Karachi';
 
-const ALL_STATUSES: OrderStatus[] = [
-  "ORDERED",
-  "REVIEWED",
-  "SEND_TO_SELLER",
-  "HOLD",
-  "REVIEW_AWAITED",
-  "REFUND_DELAYED",
-  "REFUNDED",
-  "CORRECTED",
-  "CANCELLED",
-  "COMMISSION_COLLECTED",
-  "PAID",
-  "SENT"
-];
+// const ALL_STATUSES: OrderStatus[] = [
+//   "ORDERED",
+//   "REVIEWED",
+//   "SEND_TO_SELLER",
+//   "HOLD",
+//   "REVIEW_AWAITED",
+//   "REFUND_DELAYED",
+//   "REFUNDED",
+//   "CORRECTED",
+//   "CANCELLED",
+//   "COMMISSION_COLLECTED",
+//   "PAID",
+//   "SENT"
+// ];
 
-const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
+const adminStatuses: OrderStatus[] = [
+        "ORDERED",
+        "REVIEWED",
+        "SEND_TO_SELLER",
+        "HOLD",
+        "REVIEW_AWAITED",
+        "REFUND_DELAYED",
+        "REFUNDED",
+        "CORRECTED",
+        "CANCELLED",
+        "COMMISSION_COLLECTED",
+        "PAID",
+        "SENT"
+      ];
+
+const userStatuses: OrderStatus[] = ['REVIEWED', 'ORDERED', 'CANCELLED',"REFUND_DELAYED"];
+
+
 
 const ITEMS_PER_PAGE = 10;
 
@@ -110,6 +127,10 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
 
   // Status change state
   const [changingStatusOrderId, setChangingStatusOrderId] = useState<string | null>(null);
+
+   const ALL_STATUSES = isAdmin ? adminStatuses : userStatuses;
+
+const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
 
   // Filter orders (client-side filtering still applies to the current page of orders)
   const filteredOrders = orders.filter((order) => {
