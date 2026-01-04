@@ -78,7 +78,31 @@ export interface CreateOrderData {
   amazonOrderNumber: string;
   buyerPaypal: string;
   comments?: string;
+  commission?: number;
   screenshots: File[];
+}
+
+// Socket.IO event payload for new order
+export interface NewOrderPayload {
+  _id: string;
+  userId: string;
+  amazonOrderNo: string;
+  buyerPaypal: string;
+  orderName: string;
+  buyerName?: string;
+  commentsHistory?: Array<{
+    comment: string;
+    commentedBy: string;
+    role: string;
+    _id: string;
+  }>;
+  OrderSS?: string;
+  AmazonProductSS?: string;
+  sheet?: string;
+  status: string;
+  commission?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Socket.IO event payload types
@@ -108,4 +132,6 @@ export interface AlertNotification {
   role?: string;
   createdAt: string;
   read: boolean;
+  orderName?: string;
+  isNewOrder?: boolean;
 }

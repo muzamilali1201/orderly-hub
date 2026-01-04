@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { AlertNotification, OrderStatusPayload } from '@/types/order';
+import { AlertNotification, OrderStatusPayload, NewOrderPayload } from '@/types/order';
 import { useSocket } from '@/hooks/useSocket';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -47,6 +47,32 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     queryClient.invalidateQueries({ queryKey: ['overall-orders'] });
   }, [toast, queryClient]);
 
+  const handleNewOrder = useCallback((data: NewOrderPayload) => {
+    const notification: AlertNotification = {
+      id: `new-${data._id}-${Date.now()}`,
+      orderId: data._id,
+      previousStatus: '',
+      newStatus: 'ORDERED',
+      role: 'system',
+      createdAt: data.createdAt,
+      read: false,
+      orderName: data.orderName,
+      isNewOrder: true,
+    };
+
+    setNotifications((prev) => [notification, ...prev].slice(0, 50));
+
+    // Show toast notification
+    toast({
+      title: 'New Order Created',
+      description: `New order "${data.orderName}" has been created`,
+    });
+
+    // Invalidate queries to refresh order lists
+    queryClient.invalidateQueries({ queryKey: ['orders'] });
+    queryClient.invalidateQueries({ queryKey: ['overall-orders'] });
+  }, [toast, queryClient]);
+
   const handleConnect = useCallback(() => {
     setIsConnected(true);
   }, []);
@@ -57,6 +83,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   useSocket({
     onOrderStatusChanged: handleOrderStatusChanged,
+    onNewOrder: handleNewOrder,
     onConnect: handleConnect,
     onDisconnect: handleDisconnect,
   });

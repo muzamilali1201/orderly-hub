@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Check, CheckCheck, Trash2, Wifi, WifiOff, History, ChevronLeft } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, Wifi, WifiOff, History, ChevronLeft, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -242,17 +242,35 @@ export function NotificationBell() {
                         )}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <StatusBadge
-                            status={notification.previousStatus as OrderStatus}
-                            size="sm"
-                          />
-                          <span className="text-muted-foreground">→</span>
-                          <StatusBadge
-                            status={notification.newStatus as OrderStatus}
-                            size="sm"
-                          />
-                        </div>
+                        {notification.isNewOrder ? (
+                          // New Order notification
+                          <>
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-500/10 px-2 py-0.5 rounded-full">
+                                <Plus className="h-3 w-3" />
+                                New Order
+                              </span>
+                            </div>
+                            {notification.orderName && (
+                              <p className="text-sm font-medium text-foreground mt-1 truncate">
+                                {notification.orderName}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          // Status change notification
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <StatusBadge
+                              status={notification.previousStatus as OrderStatus}
+                              size="sm"
+                            />
+                            <span className="text-muted-foreground">→</span>
+                            <StatusBadge
+                              status={notification.newStatus as OrderStatus}
+                              size="sm"
+                            />
+                          </div>
+                        )}
                         <p className="text-xs text-muted-foreground mt-1.5">
                           {notification.changedBy?.username ?? notification.role ?? 'System'}
                           {notification.changedBy?.role && (
