@@ -90,8 +90,8 @@ const PAKISTAN_TZ = 'Asia/Karachi';
 const adminStatuses: OrderStatus[] = [
         "ORDERED",
         "REVIEWED",
-        "SEND_TO_SELLER",
-        "HOLD",
+        "SENT_TO SELLER",
+        "ON HOLD",
         "REVIEW_AWAITED",
         "REFUND_DELAYED",
         "REFUNDED",
@@ -116,6 +116,7 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
 
+  console.log("ORDERS", orders);
   // Screenshot preview/lightbox state
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
@@ -248,7 +249,7 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
               {/* Header Row */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-4 py-2 sm:py-3 bg-muted/30 border-b border-border gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-foreground text-sm sm:text-base">ORD# {order.id}</span>
+                  <span className="font-semibold text-foreground text-sm sm:text-base">ORD# {order.amazonOrderNumber}</span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                   <span className="text-xs sm:text-sm text-muted-foreground">
@@ -345,7 +346,9 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs sm:text-sm text-muted-foreground">Buyer PP:</span>
-                      <span className="text-xs sm:text-sm text-foreground break-all">{order.buyerPaypal}</span>
+                      <code className="text-xs sm:text-sm bg-muted px-1.5 sm:px-2 py-0.5 rounded font-mono text-foreground break-all">
+                        {order.buyerPaypal}
+                      </code>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs sm:text-sm text-muted-foreground">Buyer Name:</span>

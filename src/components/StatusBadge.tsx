@@ -89,13 +89,13 @@ const statusConfig: Record<OrderStatus, {
     bgClass: 'bg-status-sent/80 border-status-sent/30',
     icon: RefreshCcw,
   },
-  SEND_TO_SELLER: {
-    label: 'Send to Seller',
+  "SENT_TO SELLER": {
+    label: 'Sent to Seller',
     colorClass: 'text-status-send-to-seller text-white',
     bgClass: 'bg-status-send-to-seller/80 border-status-send-to-seller/30',
     icon: RefreshCcw,
   },
-  HOLD: {
+  "ON HOLD": {
     label: 'On Hold',
     colorClass: 'text-status-hold text-white',
     bgClass: 'bg-status-on-hold/80 border-status-on-hold/30',

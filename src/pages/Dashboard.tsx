@@ -138,7 +138,7 @@ export default function Dashboard() {
     comments: o.commentsHistory,
     commission : o.commission,
     sheetName : o.sheet?.name,
-    screenshots: [o.OrderSS, o.AmazonProductSS].filter(Boolean),
+    screenshots: [o.OrderSS,o.AmazonProductSS, o.RefundSS, o.ReviewedSS].filter(Boolean),
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,
       username: o.userId?.username ?? o.createdBy?.username ?? 'unknown',

@@ -9,8 +9,8 @@ export type OrderStatus =
   | 'COMMISSION_COLLECTED'
   | 'REVIEW_DELAYED'
   | 'REFUND_DELAYED'
-  | 'SEND_TO_SELLER'
-  |      'HOLD'
+  | 'SENT_TO SELLER'
+  |      'ON HOLD'
   |      'SENT'
 
 export type UserRole = 'admin' | 'user';
