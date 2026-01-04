@@ -49,21 +49,21 @@ import { cn } from '@/lib/utils';
 const PAKISTAN_TZ = 'Asia/Karachi';
 
 const adminStatuses: OrderStatus[] = [
-        "ORDERED",
-        "REVIEWED",
-        "SEND_TO_SELLER",
-        "HOLD",
-        "REVIEW_AWAITED",
-        "REFUND_DELAYED",
-        "REFUNDED",
-        "CORRECTED",
-        "CANCELLED",
-        "COMMISSION_COLLECTED",
-        "PAID",
-        "SENT"
-      ];
+  "ORDERED",
+  "REVIEWED",
+  "SEND_TO_SELLER",
+  "HOLD",
+  "REVIEW_AWAITED",
+  "REFUND_DELAYED",
+  "REFUNDED",
+  "CORRECTED",
+  "CANCELLED",
+  "COMMISSION_COLLECTED",
+  "PAID",
+  "SENT"
+];
 
-const userStatuses: OrderStatus[] = ['REVIEWED', 'ORDERED', 'CANCELLED',"REFUND_DELAYED"];
+const userStatuses: OrderStatus[] = ['REVIEWED', 'ORDERED', 'CANCELLED', "REFUND_DELAYED"];
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -72,6 +72,7 @@ export default function OrderDetails() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>(null);
   const [refundScreenshot, setRefundScreenshot] = useState<File | null>(null);
   const [reviewScreenshot, setReviewScreenshot] = useState<File | null>(null);
   const [commission, setCommission] = useState<string>('');
@@ -92,8 +93,7 @@ export default function OrderDetails() {
     enabled: !!id,
   });
 
-  // const queryClient = ( import('@tanstack/react-query')).QueryClient ? null : null; // placeholder to lazily import queryClient in confirm
-
+  const queryClient = useQueryClient();
 
   if (error) {
     toast({ title: 'Failed to fetch order', description: (error as any)?.message || 'Unable to fetch order', variant: 'destructive' });
@@ -107,15 +107,15 @@ export default function OrderDetails() {
     buyerName: o.buyerName,
     status: o.status,
     comments: o.comments,
-    sheetName : o.sheet?.name,
-    commission : o.commission,
+    sheetName: o.sheet?.name,
+    commission: o.commission,
     commentsHistory: (o.commentsHistory ?? []) as CommentEntry[],
     screenshots: [
-    { url: o.OrderSS, name: "Order" },
-    { url: o.AmazonProductSS, name: "Amazon Product" },
-    { url: o.RefundSS, name: "Refund" },
-    { url: o.ReviewedSS, name: "Review" },
-  ].filter((s) => Boolean(s.url)),
+      { url: o.OrderSS, name: "Order" },
+      { url: o.AmazonProductSS, name: "Amazon Product" },
+      { url: o.RefundSS, name: "Refund" },
+      { url: o.ReviewedSS, name: "Review" },
+    ].filter((s) => Boolean(s.url)),
     createdBy: {
       id: o.userId?._id ?? o.userId?.id ?? o.createdBy?.id,
       username: o.userId?.username ?? o.createdBy?.username,
@@ -128,7 +128,12 @@ export default function OrderDetails() {
 
   const order = data ? mapOrder(data) : null;
 
-  const queryClient = useQueryClient();
+  // Initialize selected status when order loads
+  useEffect(() => {
+    if (order && !selectedStatus) {
+      setSelectedStatus(order.status);
+    }
+  }, [order, selectedStatus]);
 
   // Keyboard navigation for lightbox (moved up so hooks are called consistently)
   useEffect(() => {
@@ -179,9 +184,13 @@ export default function OrderDetails() {
     return formatInTimeZone(new Date(dateString), PAKISTAN_TZ, 'h:mm a');
   };
 
-  const handleStatusChange = (status: OrderStatus) => {
-    if (status === order.status) return;
-    setPendingStatus(status);
+  const handleStatusSelect = (status: OrderStatus) => {
+    setSelectedStatus(status);
+  };
+
+  const handleUpdateClick = () => {
+    if (!selectedStatus || selectedStatus === order.status) return;
+    setPendingStatus(selectedStatus);
     setShowConfirm(true);
   };
 
@@ -207,6 +216,7 @@ export default function OrderDetails() {
       setRefundScreenshot(null);
       setReviewScreenshot(null);
       setCommission('');
+      setSelectedStatus(pendingStatus);
 
       // Refresh both single order and orders list
       await refetch();
@@ -237,7 +247,6 @@ export default function OrderDetails() {
       setIsAddingComment(false);
     }
   };
-
 
   return (
     <div className="min-h-screen">
@@ -372,32 +381,31 @@ export default function OrderDetails() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {order.screenshots.map((screenshot, index) => (
-  <div key={index} className="space-y-1">
-    <button
-      type="button"
-      onClick={() => {
-        setActiveIndex(index);
-        setLightboxOpen(true);
-      }}
-      className="aspect-video w-full rounded-lg border border-border bg-muted 
-                 overflow-hidden group cursor-pointer hover:border-primary/50 
-                 transition-colors p-0"
-    >
-      <img
-        src={screenshot.url}
-        alt={screenshot.name || `Screenshot ${index + 1}`}
-        className="w-full h-full object-cover group-hover:scale-105 
-                   transition-transform duration-300"
-      />
-    </button>
+                    <div key={index} className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveIndex(index);
+                          setLightboxOpen(true);
+                        }}
+                        className="aspect-video w-full rounded-lg border border-border bg-muted 
+                                   overflow-hidden group cursor-pointer hover:border-primary/50 
+                                   transition-colors p-0"
+                      >
+                        <img
+                          src={screenshot.url}
+                          alt={screenshot.name || `Screenshot ${index + 1}`}
+                          className="w-full h-full object-cover group-hover:scale-105 
+                                     transition-transform duration-300"
+                        />
+                      </button>
 
-    {/* Screenshot name */}
-    <p className="text-xs text-muted-foreground truncate">
-      {screenshot.name}
-    </p>
-  </div>
-))}
-
+                      {/* Screenshot name */}
+                      <p className="text-xs text-muted-foreground truncate">
+                        {screenshot.name}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -425,8 +433,8 @@ export default function OrderDetails() {
               <div className="pt-4 border-t border-border space-y-3">
                 <p className="text-sm text-muted-foreground">Change Status</p>
                 <Select
-                  value={order.status}
-                  onValueChange={(value) => handleStatusChange(value as OrderStatus)}
+                  value={selectedStatus ?? order.status}
+                  onValueChange={(value) => handleStatusSelect(value as OrderStatus)}
                   disabled={isUpdating}
                 >
                   <SelectTrigger className="w-full">
@@ -485,23 +493,32 @@ export default function OrderDetails() {
                   </>
                 )}
 
-                {isUpdating && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Updating status...
-                  </div>
-                )}
+                {/* Update Button */}
+                <Button
+                  onClick={handleUpdateClick}
+                  disabled={isUpdating || !selectedStatus || selectedStatus === order.status}
+                  className="w-full"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Status'
+                  )}
+                </Button>
               </div>
             </div>
 
             {/* Status Timeline */}
             <div
-  className="rounded-xl border border-border bg-card p-6 animate-slide-up
-             max-h-[420px] overflow-y-auto"
-  style={{ animationDelay: '200ms' }}
->
-  <StatusTimeline history={order.statusHistory} />
-</div>
+              className="rounded-xl border border-border bg-card p-6 animate-slide-up
+                         max-h-[420px] overflow-y-auto"
+              style={{ animationDelay: '200ms' }}
+            >
+              <StatusTimeline history={order.statusHistory} />
+            </div>
           </div>
         </div>
       </main>
@@ -559,8 +576,6 @@ export default function OrderDetails() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-
     </div>
   );
 }

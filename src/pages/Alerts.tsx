@@ -56,8 +56,15 @@ export default function Alerts() {
 
   const formatDateTime = (d: string) => formatInTimeZone(new Date(d), PAKISTAN_TZ, 'MMM d, yyyy h:mm a');
 
+  // Detect if this is a new order creation (no previous status or same from/to)
+  const isNewOrderEntry = (e: any): boolean => {
+    const prev = e.previousStatus ?? e.previous_status;
+    const next = e.newStatus ?? e.new_status ?? e.status;
+    return prev === null || prev === undefined || (prev === next && prev === 'ORDERED');
+  };
+
   // Map /alert/history response shape to StatusHistoryEntry
-  const entries: StatusHistoryEntry[] = (raw as any[]).map((e) => ({
+  const entries: (StatusHistoryEntry & { isNewOrder?: boolean })[] = (raw as any[]).map((e) => ({
     id: e._id ?? e.id,
     orderId: (e.orderId && (typeof e.orderId === 'object') ? (e.orderId._id ?? e.orderId.id) : (e.orderId ?? e.order_id ?? e.order)) as string,
     // prefer orderName/title if server provides it; fallback to amazonOrderNo for display
@@ -71,6 +78,7 @@ export default function Alerts() {
       role: e.role ?? e.changedBy?.role ?? 'user',
     },
     changedAt: e.createdAt ?? e.created_at ?? e.changedAt ?? new Date().toISOString(),
+    isNewOrder: isNewOrderEntry(e),
   }));
 
   return (
@@ -80,7 +88,7 @@ export default function Alerts() {
           <div className="flex items-center gap-3 pl-10 md:pl-0">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-foreground">Alerts</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Recent status changes</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Recent status changes and new orders</p>
             </div>
             <span className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${isConnected ? 'bg-green-500/10 text-green-600' : 'bg-muted text-muted-foreground'}`}>
               {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
@@ -111,9 +119,9 @@ export default function Alerts() {
               <thead>
                 <tr className="bg-muted/50 border-b border-border">
                   <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
-                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">From</th>
-                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">To</th>
-                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Changed By</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">By</th>
                   <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">When</th>
                 </tr>
               </thead>
@@ -126,8 +134,29 @@ export default function Alerts() {
                       <td className="px-4 sm:px-6 py-3 sm:py-4">
                         <span className="font-medium text-foreground text-sm">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4"><StatusBadge status={(e.fromStatus ?? e.previousStatus ?? 'ORDERED') as any} size="sm" /></td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4"><StatusBadge status={(e.toStatus ?? e.newStatus ?? 'ORDERED') as any} size="sm" /></td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
+                        {e.isNewOrder ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-600 border border-green-500/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                            New Order
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                            Status Change
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
+                        {e.isNewOrder ? (
+                          <StatusBadge status="ORDERED" size="sm" />
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <StatusBadge status={(e.fromStatus ?? 'ORDERED') as any} size="sm" />
+                            <span className="text-muted-foreground">→</span>
+                            <StatusBadge status={(e.toStatus ?? 'ORDERED') as any} size="sm" />
+                          </div>
+                        )}
+                      </td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{e.changedBy.username} <span className="text-xs text-muted-foreground/70">({e.changedBy.role})</span></td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{formatDateTime(e.changedAt)}</td>
                     </tr>
@@ -154,13 +183,22 @@ export default function Alerts() {
                     <span className="font-medium text-foreground text-sm">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
                     <span className="text-xs text-muted-foreground">{formatDateTime(e.changedAt)}</span>
                   </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <StatusBadge status={(e.fromStatus ?? e.previousStatus ?? 'ORDERED') as any} size="sm" />
-                    <span className="text-muted-foreground">→</span>
-                    <StatusBadge status={(e.toStatus ?? e.newStatus ?? 'ORDERED') as any} size="sm" />
+                  <div className="mb-2">
+                    {e.isNewOrder ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-600 border border-green-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                        New Order Created
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={(e.fromStatus ?? 'ORDERED') as any} size="sm" />
+                        <span className="text-muted-foreground">→</span>
+                        <StatusBadge status={(e.toStatus ?? 'ORDERED') as any} size="sm" />
+                      </div>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Changed by {e.changedBy.username} ({e.changedBy.role})
+                    {e.isNewOrder ? 'Created by' : 'Changed by'} {e.changedBy.username} ({e.changedBy.role})
                   </p>
                 </div>
               ))
