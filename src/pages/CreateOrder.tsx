@@ -33,6 +33,7 @@ export default function CreateOrder() {
     buyerPaypal: '',
     buyerName: '',
     comments: '',
+    commission: '',
   });
   const [orderScreenshot, setOrderScreenshot] = useState<File | null>(null);
   const [productScreenshot, setProductScreenshot] = useState<File | null>(null);
@@ -70,6 +71,7 @@ export default function CreateOrder() {
       form.append('buyerPaypal', formData.buyerPaypal);
       if (formData.buyerName) form.append('buyerName', formData.buyerName);
       if (formData.comments) form.append('comments', formData.comments);
+      if (formData.commission) form.append('commission', formData.commission);
       if (selectedSheet) form.append('sheetName', selectedSheet);
 
       // Attach screenshots
@@ -225,6 +227,20 @@ export default function CreateOrder() {
                   name="buyerName"
                   placeholder="e.g., John Doe"
                   value={formData.buyerName}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="commission" className="text-sm">Commission ($)</Label>
+                <Input
+                  id="commission"
+                  name="commission"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g., 25.00"
+                  value={formData.commission}
                   onChange={handleChange}
                 />
               </div>

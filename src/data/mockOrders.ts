@@ -8,7 +8,15 @@ export const mockOrders: Order[] = [
     buyerPaypal: 'john.buyer@email.com',
     buyerName: 'John Buyer',
     status: 'ORDERED',
-    comments: 'Customer requested expedited shipping',
+    comments: [
+      {
+        comment: 'Customer requested expedited shipping',
+        commentedBy: { _id: '2', username: 'john_doe' },
+        role: 'user',
+        commentedAt: '2024-12-20T10:30:00Z',
+      },
+    ],
+    sheetName: 'January 2026',
     screenshots: ['/placeholder.svg'],
     createdBy: {
       id: '2',
@@ -35,6 +43,7 @@ export const mockOrders: Order[] = [
     buyerPaypal: 'sarah.smith@email.com',
     buyerName: 'Sarah Smith',
     status: 'REVIEWED',
+    sheetName: 'January 2026',
     screenshots: ['/placeholder.svg', '/placeholder.svg'],
     createdBy: {
       id: '2',
@@ -69,7 +78,15 @@ export const mockOrders: Order[] = [
     buyerPaypal: 'mike.johnson@email.com',
     buyerName: 'Mike Johnson',
     status: 'REVIEW_AWAITED',
-    comments: 'Awaiting customer confirmation',
+    comments: [
+      {
+        comment: 'Awaiting customer confirmation',
+        commentedBy: { _id: '1', username: 'admin' },
+        role: 'admin',
+        commentedAt: '2024-12-19T11:30:00Z',
+      },
+    ],
+    sheetName: 'December 2025',
     screenshots: ['/placeholder.svg'],
     createdBy: {
       id: '2',
@@ -104,6 +121,7 @@ export const mockOrders: Order[] = [
     buyerPaypal: 'emma.wilson@email.com',
     buyerName: 'Emma Wilson',
     status: 'PAID',
+    sheetName: 'December 2025',
     screenshots: ['/placeholder.svg'],
     createdBy: {
       id: '2',
@@ -146,7 +164,15 @@ export const mockOrders: Order[] = [
     buyerPaypal: 'david.brown@email.com',
     buyerName: 'David Brown',
     status: 'CORRECTED',
-    comments: 'Shipping address corrected',
+    comments: [
+      {
+        comment: 'Shipping address corrected',
+        commentedBy: { _id: '2', username: 'john_doe' },
+        role: 'user',
+        commentedAt: '2024-12-17T16:45:00Z',
+      },
+    ],
+    sheetName: 'December 2025',
     screenshots: ['/placeholder.svg'],
     createdBy: {
       id: '2',
@@ -189,7 +215,15 @@ export const mockOrders: Order[] = [
     buyerPaypal: 'lisa.garcia@email.com',
     buyerName: 'Lisa Garcia',
     status: 'REFUNDED',
-    comments: 'Customer requested refund - item damaged',
+    comments: [
+      {
+        comment: 'Customer requested refund - item damaged',
+        commentedBy: { _id: '1', username: 'admin' },
+        role: 'admin',
+        commentedAt: '2024-12-16T10:00:00Z',
+      },
+    ],
+    sheetName: 'November 2025',
     screenshots: ['/placeholder.svg', '/placeholder.svg'],
     createdBy: {
       id: '2',
@@ -232,7 +266,15 @@ export const mockOrders: Order[] = [
     buyerPaypal: 'alex.martinez@email.com',
     buyerName: 'Alex Martinez',
     status: 'CANCELLED',
-    comments: 'Order cancelled by customer',
+    comments: [
+      {
+        comment: 'Order cancelled by customer',
+        commentedBy: { _id: '2', username: 'john_doe' },
+        role: 'user',
+        commentedAt: '2024-12-09T09:00:00Z',
+      },
+    ],
+    sheetName: 'November 2025',
     screenshots: [],
     createdBy: {
       id: '2',
