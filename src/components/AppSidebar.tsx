@@ -189,7 +189,7 @@ export function AppSidebar() {
             <Menu className="w-5 h-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0 bg-gradient-to-b from-sidebar to-background">
+        <SheetContent side="left" className="w-64 p-0 bg-gradient-to-b from-sidebar to-background flex flex-col h-full">
           <SidebarContent isMobile />
         </SheetContent>
       </Sheet>
@@ -197,7 +197,7 @@ export function AppSidebar() {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'hidden md:flex flex-col border-r border-sidebar-border transition-all duration-300 ease-in-out',
+          'hidden md:flex flex-col border-r border-sidebar-border transition-all duration-300 ease-in-out h-screen sticky top-0',
           collapsed ? 'w-16' : 'w-64',
           'bg-gradient-to-b from-sidebar to-background'
         )}
