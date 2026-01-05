@@ -25,7 +25,7 @@ const navigation = [
   { name: 'Sheets', href: '/sheets', icon: FileSpreadsheet, adminOnly: true },
   { name: 'Alerts', href: '/alerts', icon: Bell, showBadge: true },
   { name: 'Create Order', href: '/orders/new', icon: PlusCircle },
-  { name: 'How to Use Portal', href: 'https://www.youtube.com/@YourChannel', icon: Youtube, external: true },
+  { name: 'How to Use Portal', href: 'https://www.youtube.com/@abdulrehman6669', icon: Youtube, external: true },
 ];
 
 export function AppSidebar() {
