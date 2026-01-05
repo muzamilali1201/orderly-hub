@@ -97,7 +97,7 @@ export function NotificationBell() {
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0" sideOffset={8}>
+      <PopoverContent align="end" className="w-[calc(100vw-2rem)] sm:w-80 max-w-80 p-0 z-[100]" sideOffset={8}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
             {showHistory && (
