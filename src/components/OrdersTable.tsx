@@ -374,24 +374,39 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs sm:text-sm text-muted-foreground">Screenshots:</span>
-                      <div className="flex items-center gap-1">
-                        {order.screenshots && order.screenshots.length > 0 ? (
-                          order.screenshots.slice(0, 3).map((ss, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setPreviewSrc(ss); setPreviewOpen(true); }}
-                              className="w-5 h-5 sm:w-6 sm:h-6 rounded overflow-hidden bg-muted hover:ring-2 ring-primary transition-all"
-                              title="View screenshot"
-                            >
-                              <img src={ss} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
-                            </button>
-                          ))
-                        ) : (
-                          <span className="text-xs sm:text-sm text-muted-foreground">None</span>
+                      <div className="flex items-center gap-1.5">
+                        {order.screenshots && order.screenshots[0] && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[0]); setPreviewOpen(true); }}
+                          >
+                            OrderSS
+                          </Button>
                         )}
-                        {order.screenshots && order.screenshots.length > 3 && (
-                          <span className="text-xs text-muted-foreground">+{order.screenshots.length - 3}</span>
+                        {order.screenshots && order.screenshots[2] && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[2]); setPreviewOpen(true); }}
+                          >
+                            RefundSS
+                          </Button>
+                        )}
+                        {order.screenshots && order.screenshots[3] && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[3]); setPreviewOpen(true); }}
+                          >
+                            ReviewedSS
+                          </Button>
+                        )}
+                        {(!order.screenshots || order.screenshots.length === 0) && (
+                          <span className="text-xs sm:text-sm text-muted-foreground">None</span>
                         )}
                       </div>
                     </div>
