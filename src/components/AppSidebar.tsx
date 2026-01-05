@@ -8,7 +8,8 @@ import {
   User,
   Bell,
   Menu,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Youtube
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Sheets', href: '/sheets', icon: FileSpreadsheet, adminOnly: true },
   { name: 'Alerts', href: '/alerts', icon: Bell, showBadge: true },
   { name: 'Create Order', href: '/orders/new', icon: PlusCircle },
+  { name: 'How to Use Portal', href: 'https://www.youtube.com/@YourChannel', icon: Youtube, external: true },
 ];
 
 export function AppSidebar() {
@@ -65,7 +67,30 @@ export function AppSidebar() {
         {navigation
           .filter((item) => !item.adminOnly || isAdmin)
           .map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = !item.external && location.pathname === item.href;
+            
+            // External link (YouTube)
+            if (item.external) {
+              return (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative',
+                    'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                    !isMobile && collapsed && 'justify-center px-2'
+                  )}
+                >
+                  <div className="relative shrink-0">
+                    <item.icon className="w-5 h-5 text-red-500" />
+                  </div>
+                  {(isMobile || !collapsed) && <span>{item.name}</span>}
+                </a>
+              );
+            }
+            
             return (
               <NavLink
                 key={item.name}
