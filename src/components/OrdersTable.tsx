@@ -115,8 +115,6 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-
-  console.log("ORDERS", orders);
   // Screenshot preview/lightbox state
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
@@ -129,7 +127,9 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
   // Status change state
   const [changingStatusOrderId, setChangingStatusOrderId] = useState<string | null>(null);
 
-   const ALL_STATUSES = isAdmin ? adminStatuses : userStatuses;
+   const ALL_STATUSES = adminStatuses;
+
+   const changeStatuses = isAdmin ? adminStatuses : userStatuses
 
 const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
 
@@ -279,7 +279,7 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent className="max-h-64 overflow-y-auto">
-                            {ALL_STATUSES.filter(s => s !== order.status).map((status) => (
+                            {changeStatuses.filter(s => s !== order.status).map((status) => (
                               <DropdownMenuItem
                                 key={status}
                                 onClick={(e) => {
