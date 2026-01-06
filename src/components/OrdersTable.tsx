@@ -379,30 +379,33 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-6 px-2 text-xs"
+                            className="h-6 px-2 text-xs bg-emerald-500/20 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300"
                             onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[0]); setPreviewOpen(true); }}
                           >
-                            OrderSS
+                            <ImageIcon className="w-3 h-3 mr-1" />
+                            Order
                           </Button>
                         )}
                         {order.screenshots && order.screenshots[2] && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-6 px-2 text-xs"
+                            className="h-6 px-2 text-xs bg-amber-500/20 border-amber-500/50 text-amber-400 hover:bg-amber-500/30 hover:text-amber-300"
                             onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[2]); setPreviewOpen(true); }}
                           >
-                            RefundSS
+                            <ImageIcon className="w-3 h-3 mr-1" />
+                            Refund
                           </Button>
                         )}
                         {order.screenshots && order.screenshots[3] && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-6 px-2 text-xs"
+                            className="h-6 px-2 text-xs bg-purple-500/20 border-purple-500/50 text-purple-400 hover:bg-purple-500/30 hover:text-purple-300"
                             onClick={(e) => { e.stopPropagation(); setPreviewSrc(order.screenshots[3]); setPreviewOpen(true); }}
                           >
-                            ReviewedSS
+                            <ImageIcon className="w-3 h-3 mr-1" />
+                            Reviewed
                           </Button>
                         )}
                         {(!order.screenshots || order.screenshots.length === 0) && (
