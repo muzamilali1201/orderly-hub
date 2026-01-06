@@ -130,7 +130,7 @@ export default function Alerts() {
                   <tr><td colSpan={5} className="px-6 py-16 text-center">{isLoading ? 'Loading...' : 'No alerts found'}</td></tr>
                 ) : (
                   entries.map((e) => (
-                    <tr key={e.id} className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => e.orderId && navigate(`/orders/${e.orderId}`)}>
+                    <tr key={e.id} className="hover:bg-accent/50 transition-colors cursor-pointer">
                       <td className="px-4 sm:px-6 py-3 sm:py-4">
                         <span className="font-medium text-foreground text-sm">{e.orderName ?? e.amazonOrderNo ?? ''}</span>
                         <p className="font-normal text-foreground text-xs">{ e.amazonOrderNo ?? ''}</p>

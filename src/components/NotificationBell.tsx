@@ -66,9 +66,9 @@ export function NotificationBell() {
 
   const handleHistoryClick = (entry: StatusHistoryEntry) => {
     setOpen(false);
-    if (entry.orderId) {
-      navigate(`/orders/${entry.orderId}`);
-    }
+    // if (entry.orderId) {
+    //   navigate(`/orders/${entry.orderId}`);
+    // }
   };
 
   const formatDateTime = (d: string) => formatInTimeZone(new Date(d), PAKISTAN_TZ, 'MMM d, h:mm a');

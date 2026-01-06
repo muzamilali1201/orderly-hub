@@ -426,7 +426,7 @@ export default function OrderDetails() {
           <div className="space-y-6" style={{ animationDelay: '100ms' }}>
             {/* Status Update Card */}
             <div className="rounded-xl border border-border bg-card p-6 space-y-4 animate-slide-up">
-              <h3 className="text-lg font-semibold text-foreground">Update Status</h3>
+              <h3 className="text-lg font-semibold text-foreground">Update</h3>
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">Current Status</p>
                 <StatusBadge status={order.status} size="lg" />
@@ -507,7 +507,7 @@ export default function OrderDetails() {
                       Updating...
                     </>
                   ) : (
-                    'Update Status'
+                    'Update'
                   )}
                 </Button>
               </div>
