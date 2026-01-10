@@ -86,23 +86,23 @@ export function StatusTimeline({ history }: StatusTimelineProps) {
 
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      {entry.changedBy.role === 'admin' ? (
+                      {entry.changedBy?.role === 'admin' ? (
                         <Shield className="w-3.5 h-3.5 text-primary" />
                       ) : (
                         <User className="w-3.5 h-3.5" />
                       )}
                       <span className="font-medium text-foreground">
-                        {entry.changedBy.username}
+                        {entry.changedBy?.username ?? 'System'}
                       </span>
                       <span
                         className={cn(
                           'px-1.5 py-0.5 rounded text-xs capitalize',
-                          entry.changedBy.role === 'admin'
+                          entry.changedBy?.role === 'admin'
                             ? 'bg-primary/10 text-primary'
                             : 'bg-muted text-muted-foreground'
                         )}
                       >
-                        {entry.changedBy.role}
+                        {entry.changedBy?.role ?? 'system'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
