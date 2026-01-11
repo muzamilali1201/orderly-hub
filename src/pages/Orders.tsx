@@ -29,13 +29,19 @@ export default function Orders() {
   const [page, setPage] = useState(1);
   // Per-page selection (user configurable)
   const [perPage, setPerPage] = useState(25);
+  // Server-side search and filter state
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
-  // Fetch orders from API (server paginated)
+  // Fetch orders from API (server paginated with search & filter)
   const { toast } = useToast();
   const { data, isLoading, error } = useQuery<OrdersResponse | any[]>({
-    queryKey: ['orders', { page, perPage }],
+    queryKey: ['orders', { page, perPage, search, statusFilter }],
     queryFn: async () => {
-      const res = await getOrders({ page, perPage });
+      const params: { page: number; perPage: number; search?: string; filterBy?: string } = { page, perPage };
+      if (search.trim()) params.search = search.trim();
+      if (statusFilter && statusFilter !== 'ALL') params.filterBy = statusFilter;
+      const res = await getOrders(params);
       return res.data ?? res;
     },
     placeholderData: (previousData) => previousData,
@@ -131,25 +137,21 @@ export default function Orders() {
       </header>
 
       <main className="p-4 sm:p-6">
-        {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <svg className="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-            </svg>
-          </div>
-        ) : (
-          <OrdersTable
-            orders={visibleOrders}
-            isAdmin={isAdmin}
-            serverPaginated
-            currentPage={page}
-            totalPages={totalPages}
-            hasMore={hasMore}
-            onPageChange={(p) => setPage(p)}
-            isLoading={isLoading}
-          />
-        )}
+        <OrdersTable
+          orders={visibleOrders}
+          isAdmin={isAdmin}
+          serverPaginated
+          currentPage={page}
+          totalPages={totalPages}
+          hasMore={hasMore}
+          onPageChange={(p) => setPage(p)}
+          isLoading={isLoading}
+          // Server-side search/filter
+          serverSearch={search}
+          onSearchChange={(s) => { setSearch(s); setPage(1); }}
+          serverStatusFilter={statusFilter}
+          onStatusFilterChange={(f) => { setStatusFilter(f); setPage(1); }}
+        />
       </main>
     </div>
   );
