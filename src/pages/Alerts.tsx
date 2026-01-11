@@ -158,7 +158,7 @@ export default function Alerts() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{e.changedBy.username ?? 'System'} <span className="text-xs text-muted-foreground/70">({e.changedBy.role})</span></td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{e.changedBy.username} <span className="text-xs text-muted-foreground/70">({e.changedBy.role})</span></td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{formatDateTime(e.changedAt)}</td>
                     </tr>
                   ))
@@ -199,7 +199,7 @@ export default function Alerts() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {e.isNewOrder ? 'Created by' : 'Changed by'} {e.changedBy.username ?? 'System'} ({e.changedBy.role})
+                    {e.isNewOrder ? 'Created by' : 'Changed by'} {e.changedBy.username} ({e.changedBy.role})
                   </p>
                 </div>
               ))

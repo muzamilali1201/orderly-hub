@@ -228,7 +228,7 @@ export function NotificationBell() {
                 {notifications.map((notification) => (
                   <button
                     key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
+                    // onClick={() => handleNotificationClick(notification)}
                     className={cn(
                       'w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors',
                       !notification.read && 'bg-primary/5'
