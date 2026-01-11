@@ -68,6 +68,14 @@ interface OrdersTableProps {
   isLoading?: boolean;
   /** When server doesn't return a total, indicates there may be a next page */
   hasMore?: boolean;
+  /** Server-controlled search value */
+  serverSearch?: string;
+  /** Callback when search changes (for server-side search) */
+  onSearchChange?: (search: string) => void;
+  /** Server-controlled status filter */
+  serverStatusFilter?: string;
+  /** Callback when status filter changes (for server-side filtering) */
+  onStatusFilterChange?: (status: string) => void;
 }
 
 const PAKISTAN_TZ = 'Asia/Karachi';
@@ -108,13 +116,38 @@ const userStatuses: OrderStatus[] = ['REVIEWED', 'ORDERED', 'CANCELLED',"REFUND_
 
 const ITEMS_PER_PAGE = 10;
 
-export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginated = false, currentPage: currentPageProp = 1, totalPages: totalPagesProp, onPageChange, isLoading = false, hasMore = false }: OrdersTableProps) {
+export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginated = false, currentPage: currentPageProp = 1, totalPages: totalPagesProp, onPageChange, isLoading = false, hasMore = false, serverSearch, onSearchChange, serverStatusFilter, onStatusFilterChange }: OrdersTableProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Use server-controlled values if provided, otherwise use local state
+  const isServerControlled = serverPaginated && (onSearchChange || onStatusFilterChange);
+  const [localSearch, setLocalSearch] = useState('');
+  const [localStatusFilter, setLocalStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
+  
+  const search = isServerControlled && serverSearch !== undefined ? serverSearch : localSearch;
+  const statusFilter = isServerControlled && serverStatusFilter !== undefined ? serverStatusFilter : localStatusFilter;
+  
+  const handleSearchChange = (value: string) => {
+    if (onSearchChange) {
+      onSearchChange(value);
+    } else {
+      setLocalSearch(value);
+      setClientCurrentPage(1);
+    }
+  };
+  
+  const handleStatusFilterChange = (value: string) => {
+    if (onStatusFilterChange) {
+      onStatusFilterChange(value);
+    } else {
+      setLocalStatusFilter(value as OrderStatus | 'ALL');
+      setClientCurrentPage(1);
+    }
+  };
+  
+  const [clientCurrentPage, setClientCurrentPage] = useState(1);
   // Screenshot preview/lightbox state
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
@@ -133,8 +166,8 @@ export function OrdersTable({ orders, isAdmin, showFilters = true, serverPaginat
 
 const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
 
-  // Filter orders (client-side filtering still applies to the current page of orders)
-  const filteredOrders = orders.filter((order) => {
+  // When server-controlled, skip client-side filtering (server already filtered)
+  const filteredOrders = isServerControlled ? orders : orders.filter((order) => {
     const matchesSearch =
       order.orderName.toLowerCase().includes(search.toLowerCase()) ||
       order.amazonOrderNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -154,6 +187,7 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
   const clientTotalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
   const isServer = serverPaginated;
   const totalPages = isServer ? (typeof totalPagesProp === 'number' ? totalPagesProp : undefined) : clientTotalPages;
+  const currentPage = isServer ? currentPageProp : clientCurrentPage;
 
   // When serverPaginated, the `orders` prop is assumed to be the current page's items
   const paginatedOrders = isServer ? filteredOrders : filteredOrders.slice((currentPage - 1) * ITEMS_PER_PAGE, (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE);
@@ -194,19 +228,13 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
             <Input
               placeholder="Search orders..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
             />
           </div>
           <Select
             value={statusFilter}
-            onValueChange={(value) => {
-              setStatusFilter(value as OrderStatus | 'ALL');
-              setCurrentPage(1);
-            }}
+            onValueChange={handleStatusFilterChange}
           >
             <SelectTrigger className="w-full sm:w-48">
               <Filter className="w-4 h-4 mr-2" />
@@ -441,7 +469,7 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                   if (isServer) {
                     onPageChange?.(Math.max(1, (currentPageProp || 1) - 1));
                   } else {
-                    setCurrentPage((p) => Math.max(1, p - 1));
+                    setClientCurrentPage((p) => Math.max(1, p - 1));
                   }
                 }}
                 disabled={isServer ? (currentPageProp === 1) : (currentPage === 1)}
@@ -466,7 +494,7 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                         if (isServer) {
                           onPageChange?.(page);
                         } else {
-                          setCurrentPage(page);
+                          setClientCurrentPage(page);
                         }
                       }}
                       className="w-7 h-7 sm:w-8 sm:h-8 p-0 text-xs sm:text-sm"
@@ -484,7 +512,7 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                   if (isServer) {
                     onPageChange?.(typeof totalPages !== 'undefined' ? Math.min(totalPages, (currentPageProp || 1) + 1) : (currentPageProp || 1) + 1);
                   } else {
-                    setCurrentPage((p) => Math.min(totalPages, p + 1));
+                    setClientCurrentPage((p) => Math.min(totalPages ?? p, p + 1));
                   }
                 }}
                 disabled={isServer ? (!hasMore && (typeof totalPages === 'undefined')) || (typeof totalPages !== 'undefined' && currentPageProp === totalPages) : (currentPage === totalPages)}
