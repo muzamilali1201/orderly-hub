@@ -441,6 +441,10 @@ const statuses: (OrderStatus | 'ALL')[] = ['ALL', ...ALL_STATUSES];
                         )}
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Last Updated:</span>
+                      <span className="text-xs sm:text-sm text-foreground">{formatDate(order.updatedAt) ?? 0}</span>
+                    </div>
                   </div>
                 </div>
               </div>
